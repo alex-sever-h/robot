@@ -10,6 +10,14 @@
 
 #define BUFFERED
 
+
+typedef enum bt_mode_st
+{
+	CONNECTED,
+	CMD_MODE
+} BT_MODE_ST;
+
+
 void bt_init( int baudrate );
 
 void bt_put(uint8_t ch);

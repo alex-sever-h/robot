@@ -62,7 +62,9 @@ int int_to_a(char * str, int number)
 
 
 
-void delay(u32 nCount)
+void delay(unsigned int  nCount)
 {
-  for(; nCount != 0; nCount--);
+	unsigned int i;
+	for(i = 0 ; i < nCount; i++)
+			__asm__("nop");
 }

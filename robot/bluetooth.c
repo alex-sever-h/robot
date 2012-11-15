@@ -6,19 +6,14 @@
 #include <libopencm3/cm3/systick.h>
 #include "bluetooth.h"
 #include "ringbuffer.h"
+#include "generics.h"
 
-#define CONNECT     "CONNECT"
-#define DISCONNECT  "DISCONNECT"
+const char connect_str[] = "CONNECT";
+const char disconnect_str[] = "DISCONNECT";
 
 volatile RINGBUFFER u2rx, u2tx;
 
-enum bt_mode_st
-{
-	CONNECTED,
-	CMD_MODE
-};
-
-enum bt_mode_st bt_mode;
+BT_MODE_ST bt_mode;
 
 
 void bt_init( int baudrate )
@@ -137,15 +132,49 @@ void bt_puts(const u8 * string)
 	usart_enable_tx_interrupt(USART3);
 }
 
-int bt_connected_status()
+BT_MODE_ST bt_check_already_connected()
 {
-	char buff[7+1];
+	char c;
 
-	buffer_strncpy(&u2rx, buff, 7);
-	buff[7] = '\0';
-	usart_puts(buff);
+	//send modem verification
+	bt_puts("AT\r");
 
-	return 0;
+	//wait for response
+	delay(0xFFFF);
+
+	//check for OK response
+	c = bt_get_noblock();
+	if(c != 'O')
+		return CMD_MODE;
+	if(c != 'K')
+		return CMD_MODE;
+
+	return CONNECTED;
+}
+
+void bt_wait_connected_status()
+{
+	//char *cnct_ptr = connect_str;
+	char *buffer[7];
+	int i;
+
+	//pass through each letter from CONNECT string
+	for(i = 0 ; i < 7; ++i)
+	{
+		buffer[i] = bt_get_block();
+
+		// if did not receive CONNECT
+		if(buffer[i] != connect_str[i])
+		{
+			//send what we received
+			for(i = 0 ; i <= i; ++i)
+				usart1_put(buffer[i]);
+
+			//resume from the start of CONNECT
+			i = 0;
+		}
+	}
+
 }
 
 
@@ -158,6 +187,7 @@ void bt_send_sensor_reading(uint8_t sensor_code, unsigned int sensor_reading)
 	bt_put( (sensor_reading>>24) & 0xFF);
 	bt_put('\r');
 }
+
 
 
 

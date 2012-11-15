@@ -21,6 +21,12 @@ inline u16 get_oc_value(u32 percet, u32 percentage)
 	return  (( (u32) percet * (timer_period - 1)) / percentage);
 }
 
+void motor_init()
+{
+	motor_GPIO_config();
+	motor_TIMER_config();
+	motor_control_pwm(0, 0);
+}
 
 void motor_GPIO_config(void)
 {
