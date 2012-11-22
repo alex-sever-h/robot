@@ -8,8 +8,8 @@
 #include "ringbuffer.h"
 #include "generics.h"
 
-const char connect_str[] = "CONNECT";
-const char disconnect_str[] = "DISCONNECT";
+const char connect_str[] = "CONNECT ";
+const char disconnect_str[] = "DISCONNECT ";
 
 volatile RINGBUFFER u2rx, u2tx;
 
@@ -103,7 +103,7 @@ u8 bt_get_noblock(void)
 	}
 }
 
-u8 *bt_get_stream(void)
+volatile u8 *bt_get_stream(void)
 {
 	if (buffer_empty(&u2rx) == SUCCESS)
 		return 0;
@@ -114,7 +114,7 @@ u8 *bt_get_stream(void)
 	return 0;
 }
 
-void bt_put(u8 ch)
+void bt_put(char ch)
 {
 	//put char to the buffer
 	buffer_put(&u2tx, ch);
@@ -122,14 +122,14 @@ void bt_put(u8 ch)
 	usart_enable_tx_interrupt(USART3);
 }
 
-void bt_puts(const u8 * string)
+void bt_puts(const char * string)
 {
 	while(*string)
 	{
 		buffer_put(&u2tx, *string);
+		usart_enable_tx_interrupt(USART3);
 		string++;
 	}
-	usart_enable_tx_interrupt(USART3);
 }
 
 BT_MODE_ST bt_check_already_connected()
@@ -140,45 +140,69 @@ BT_MODE_ST bt_check_already_connected()
 	bt_puts("AT\r");
 
 	//wait for response
-	delay(0xFFFF);
+	/* 72MHz / 8 => 9000000 counts per second. */
+	systick_set_clocksource(STK_CTRL_CLKSOURCE_AHB_DIV8);
+	/* 9000000/9000 = 1000 overflows per second - every 1ms one interrupt */
+	systick_set_reload(900000);
+	/* Start counting. */
+	systick_counter_enable();
+	while (systick_get_value() > 1000);
 
 	//check for OK response
 	c = bt_get_noblock();
 	if(c != 'O')
-		return CMD_MODE;
-	if(c != 'K')
-		return CMD_MODE;
+		return CONNECTED;
 
-	return CONNECTED;
+	c = bt_get_noblock();
+	if(c != 'K')
+		return CONNECTED;
+
+	c = bt_get_noblock();
+	if(c != '\r')
+		return CONNECTED;
+
+	return CMD_MODE;
 }
 
 void bt_wait_connected_status()
 {
 	//char *cnct_ptr = connect_str;
-	char *buffer[7];
+	char buffer[8];
 	int i;
 
+	if (bt_check_already_connected() == CONNECTED)
+		return;
+
 	//pass through each letter from CONNECT string
-	for(i = 0 ; i < 7; ++i)
+	for(i = 0 ; i < 8; ++i)
 	{
-		buffer[i] = bt_get_block();
+		while (	(buffer[i] = bt_get_noblock()) == 0 )
+		{
+			char c = usart1_get_noblock();
+			if(c != 0)
+			{
+				bt_put(c);
+				uart1_put(c);
+			}
+		}
 
 		// if did not receive CONNECT
 		if(buffer[i] != connect_str[i])
 		{
+			int j;
 			//send what we received
-			for(i = 0 ; i <= i; ++i)
-				usart1_put(buffer[i]);
+			for(j = 0 ; j <= i; ++j)
+				uart1_put(buffer[j]);
 
 			//resume from the start of CONNECT
-			i = 0;
+			i = -1;
 		}
 	}
 
 }
 
 
-void bt_send_sensor_reading(uint8_t sensor_code, unsigned int sensor_reading)
+void bt_send_sensor_reading(u8 sensor_code, unsigned int sensor_reading)
 {
 	bt_put(sensor_code);
 	bt_put( (sensor_reading>> 0) & 0xFF);

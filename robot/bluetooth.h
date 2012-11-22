@@ -20,10 +20,10 @@ typedef enum bt_mode_st
 
 void bt_init( int baudrate );
 
-void bt_put(uint8_t ch);
-uint8_t bt_get(void);
+void bt_put(char ch);
+char bt_get(void);
 
-void bt_puts(const u8 * string);
+void bt_puts(const char * string);
 
 
 

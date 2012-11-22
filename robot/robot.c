@@ -47,7 +47,8 @@ int main(void)
 	bt_init(460800);
 	motor_init();
 
-	usart_puts("UART test ... \r");
+
+	usart_puts("...... UART TEST ......\r");
 
 	gpio_set_mode(GPIOA,
 			GPIO_MODE_OUTPUT_50_MHZ,
@@ -56,52 +57,51 @@ int main(void)
 
 	gpio_clear(GPIOA, GPIO2 | GPIO3);
 
-	//if (bt_check_already_connected() == CMD_MODE)
 
-	//gpio_set(GPIOA, GPIO2);
+	bt_wait_connected_status();
 
-	//bt_wait_connected_status();
 
-	gpio_set(GPIOA, GPIO3);
 
 	while(1) {
 		char c;
 
 		c = bt_get_block();
 
-		switch(c)
-		{
-		case 'f':
-		{
-			motor_control_pwm(1000,1000);
-		}break;
-		case 'l':
-		{
-			motor_control_pwm(300,1000);
-		}break;
-		case 'r':
-		{
-			motor_control_pwm(1000, 300);
-		}break;
-		case 'F':
-		{
-			motor_control_pwm(-1000,-1000);
-		}break;
-		case 'L':
-		{
-			motor_control_pwm(-300,-1000);
-		}break;
-		case 'R':
-		{
-			motor_control_pwm(-1000, -300);
-		}break;
-		default:
-		{
-			motor_control_pwm(0, 0);
-		}break;
-		}
+		interpret_byte(c);
 
-
+		//		switch(c)
+		//		{
+		//		case 'f':
+		//		{
+		//			motor_control_pwm(1000,1000);
+		//		}break;
+		//		case 'l':
+		//		{
+		//			motor_control_pwm(300,1000);
+		//		}break;
+		//		case 'r':
+		//		{
+		//			motor_control_pwm(1000, 300);
+		//		}break;
+		//		case 'F':
+		//		{
+		//			motor_control_pwm(-1000,-1000);
+		//		}break;
+		//		case 'L':
+		//		{
+		//			motor_control_pwm(-300,-1000);
+		//		}break;
+		//		case 'R':
+		//		{
+		//			motor_control_pwm(-1000, -300);
+		//		}break;
+		//		default:
+		//		{
+		//			motor_control_pwm(0, 0);
+		//		}break;
+		//		}
+		//
+		//
 
 
 		//
@@ -205,6 +205,8 @@ int main(void)
 		//		Delay(0xAFFF);Delay(0xAFFF);Delay(0xAFFF);Delay(0xAFFF);Delay(0xAFFF);Delay(0xAFFF);Delay(0xAFFF);
 		//	}
 
-		return 0;
+
 	}
+
+	return 0;
 }

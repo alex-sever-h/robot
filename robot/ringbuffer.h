@@ -14,7 +14,7 @@
 #define FAILURE 0
 #define SUCCESS 1
 
-#define USARTBUFFSIZE 24
+#define USARTBUFFSIZE 1024
 
 typedef struct{
   u32 in;

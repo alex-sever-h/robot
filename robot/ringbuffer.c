@@ -17,8 +17,7 @@ void buffer_reset(volatile RINGBUFFER *buffer)
 
 int buffer_put(volatile RINGBUFFER *buffer, u8 c)
 {
-	if  (buffer->count == USARTBUFFSIZE)
-		return FAILURE;
+	while (buffer->count == USARTBUFFSIZE);
 
 	buffer->data[buffer->in++]=c;
 	buffer->count++;

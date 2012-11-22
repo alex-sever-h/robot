@@ -9,9 +9,8 @@
 #define MOTOR_CTRL_H_
 
 
-void motor_GPIO_config(void);
-void motor_TIMER_config(void);
+void motor_init(void);
 
-
+void motor_control_lr(int left, int right);
 
 #endif /* MOTOR_CTRL_H_ */

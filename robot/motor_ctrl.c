@@ -53,8 +53,6 @@ void motor_GPIO_config(void)
 
 }
 
-
-
 void motor_control_pwm(int left, int right)
 {
 	//set direction
@@ -91,8 +89,18 @@ void motor_control_pwm(int left, int right)
 	timer_set_oc_value(TIM3, TIM_OC4, motor_rear_rigth);
 
 }
+/** Directly control motor left and right PWM in 128 steps
+ */
+void motor_control_lr(int left, int right)
+{
+	int left_pwm;
+	int right_pwm;
 
+	left_pwm = 1000 * left / 128;
+	right_pwm = 1000 * right / 128;
 
+	motor_control_pwm(left_pwm, right_pwm);
+}
 
 void motor_go_forward(int speed)
 {

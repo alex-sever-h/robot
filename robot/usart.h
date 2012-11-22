@@ -14,7 +14,7 @@
 
 void usart_init( int baudrate );
 
-void usart1_put(uint8_t ch);
+void uart1_put(uint8_t ch);
 uint8_t usart1_get(void);
 
 void usart_puts(const char * string);
