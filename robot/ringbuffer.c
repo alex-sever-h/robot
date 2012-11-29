@@ -10,41 +10,59 @@
 
 void buffer_reset(volatile RINGBUFFER *buffer)
 {
-	buffer->count = 0;
+	//buffer->count = 0;
 	buffer->in    = 0;
 	buffer->out   = 0;
 }
 
+inline u32 rb_inc_index(u32 index)
+{
+	index++;
+	if(index == USARTBUFFSIZE)
+		index = 0;
+	return index;
+}
+
+inline u32 rb_dec_index(u32 index)
+{
+	index--;
+	if(index == -1)
+		index = USARTBUFFSIZE-1;
+	return index;
+}
+
 int buffer_put(volatile RINGBUFFER *buffer, u8 c)
 {
-	while (buffer->count == USARTBUFFSIZE);
+	if (buffer->in == rb_dec_index(buffer->out) )
+	{
+		buffer->out = rb_inc_index(buffer->out);
+	}
 
-	buffer->data[buffer->in++]=c;
-	buffer->count++;
+	buffer->data[buffer->in]=c;
+	//buffer->count++;
 
-	if (buffer->in == USARTBUFFSIZE)
-		buffer->in=0;
+	buffer->in = rb_inc_index(buffer->in);
 
 	return SUCCESS;
 }
 
 int buffer_get(volatile RINGBUFFER *buffer, u8 *c)
 {
-	if (buffer->count == 0)
+	if (buffer->in == buffer->out)
 		return FAILURE;
 
-	*c = buffer->data[buffer->out++];
-	buffer->count--;
+	*c = buffer->data[buffer->out];
+	//buffer->count--;
 
-	if (buffer->out == USARTBUFFSIZE)
-		buffer->out = 0;
+	buffer->out = rb_inc_index(buffer->out);
+
 
 	return SUCCESS;
 }
 
 int buffer_empty(volatile RINGBUFFER *buffer)
 {
-	if (buffer->count == 0)
+	if (buffer->in == buffer->out)
 		return SUCCESS;
 	else
 		return FAILURE;
@@ -82,6 +100,30 @@ int buffer_strncpy(volatile RINGBUFFER *buffer, char * string, int n)
 	//	strncpy(string, buffer->data + startpos , first_len);
 	//
 	//	strncpy(string+first_len, buffer->data, last_len);
+
+	return SUCCESS;
+}
+
+
+
+int buffer_get_last_line(volatile RINGBUFFER *buffer, char * string)
+{
+	int startpos;
+	int first_len;
+	int last_len;
+	int i, j, offset;
+
+
+	for(i = buffer->in-1;(buffer->data[i] != '\r') || (i != buffer->in); i--)
+	{
+		if(i < 0) i = USARTBUFFSIZE;
+	}
+
+	for(j = 0; i <= buffer->in; i++, j++)
+	{
+		string[j] = buffer->data[i];
+	}
+	buffer->out = i;
 
 	return SUCCESS;
 }

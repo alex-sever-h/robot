@@ -8,11 +8,13 @@
 
 #include "bluetooth.h"
 #include "usart.h"
+#include "state_machine.h"
 #include "command_interpretor.h"
 #include "libopencm3/cm3/common.h"
 
 #define MOTOR_LR_QUEUE 0x00000001
 const char MOTOR_LR_CMD[] = "MLR";
+
 
 #define END_CMD        '\r'
 
@@ -23,38 +25,39 @@ int parameters[5];
 u32 command_queue;
 int cmd_index;
 
+int motor_lr(void);
+int motor_angle(void);
+
+command_struct_t cmds[]=
+{
+		{
+				.cmd_str          = "M_LR",
+				.cmd_parameter_nr = 2,
+				.cmd_action       = motor_lr,
+		},
+		{
+				.cmd_str          = "M_ANGLE",
+				.cmd_parameter_nr = 2,
+				.cmd_action       = motor_angle,
+		},
+		{
+				.cmd_str          = "CONNECT",
+				.cmd_parameter_nr = 15,
+				.cmd_action       = state_connect,
+		},
+		{
+				.cmd_str          = "DISCONNECT",
+				.cmd_parameter_nr = 15,
+				.cmd_action       = state_disconnect,
+		}
+};
+
+const int cmds_len = sizeof(cmds)/sizeof(command_struct_t);
 
 
 int check_command(char cmd_byte, const char *cmd_str, u32 cmd_queue_flag, int param_nr, int cmd_index)
 {
-	// if other command --> quit
-	if((command_queue != 0) && (command_queue & cmd_queue_flag == 0))
-		return 0;
 
-	if (cmd_index >= 0 && cmd_index < (int)strlen(cmd_str))
-	{
-		if(cmd_str[cmd_index] == cmd_byte)
-			command_queue |= cmd_queue_flag;
-		else
-			command_queue &= ~cmd_queue_flag;
-	}
-	else if (cmd_index >= strlen(cmd_str) && cmd_index < strlen(cmd_str) + param_nr)
-	{
-		parameters[cmd_index - strlen(cmd_str)] = cmd_byte;
-	}
-	else if (cmd_index == strlen(cmd_str) + param_nr)
-	{
-		if (cmd_str[cmd_index] == '\r')
-		{
-			command_queue = 0;
-			return 1;
-		}
-		else
-		{
-			command_queue &= ~cmd_queue_flag;
-			return 0;
-		}
-	}
 	return 0;
 }
 
@@ -75,6 +78,20 @@ void interpret_byte(char cmd)
 }
 
 
+int motor_lr(void)
+{
+
+}
+
+int motor_angle(void)
+{
+
+}
+
+inline int is_endchar(char c)
+{
+	return c == END_CMD;
+}
 
 
 

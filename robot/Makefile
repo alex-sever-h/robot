@@ -17,7 +17,7 @@
 ## along with this library.  If not, see <http://www.gnu.org/licenses/>.
 ##
 
-OBJS = bluetooth.o usart.o ringbuffer.o motor_ctrl.o generics.o command_interpretor.o
+OBJS = bluetooth.o usart.o ringbuffer.o motor_ctrl.o generics.o command_interpretor.o state_machine.o
 
 BINARY = robot
 

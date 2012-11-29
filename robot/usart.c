@@ -78,7 +78,7 @@ void usart1_isr(void)
 
 
 
-void uart1_put(u8 ch)
+void tty_put(u8 ch)
 {
 #ifdef BUFFERED
 	//put char to the buffer
@@ -93,7 +93,7 @@ void uart1_put(u8 ch)
 }
 
 
-u8 usart1_get_noblock(void)
+u8 tty_get_noblock(void)
 {
 #ifdef BUFFERED
 	u8 ch;
@@ -112,6 +112,11 @@ u8 usart1_get_noblock(void)
 #endif
 }
 
+u8 tty_rx_empty(void)
+{
+	return buffer_empty(&u1rx);
+}
+
 
 void usart_puts(const char * string)
 {
@@ -125,7 +130,7 @@ void usart_puts(const char * string)
 #else
 	while(*string)
 	{
-		uart1_put(*string);
+		tty_put(*string);
 		string++;
 	}
 #endif

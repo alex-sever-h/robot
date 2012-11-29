@@ -7,13 +7,14 @@
 #include "bluetooth.h"
 #include "ringbuffer.h"
 #include "generics.h"
+#include "state_machine.h"
 
 const char connect_str[] = "CONNECT ";
 const char disconnect_str[] = "DISCONNECT ";
 
 volatile RINGBUFFER u2rx, u2tx;
 
-BT_MODE_ST bt_mode;
+robot_state_t bt_mode;
 
 
 void bt_init( int baudrate )
@@ -103,6 +104,11 @@ u8 bt_get_noblock(void)
 	}
 }
 
+int bt_rx_empty(void)
+{
+	return buffer_empty(&u2rx);
+}
+
 volatile u8 *bt_get_stream(void)
 {
 	if (buffer_empty(&u2rx) == SUCCESS)
@@ -132,7 +138,7 @@ void bt_puts(const char * string)
 	}
 }
 
-BT_MODE_ST bt_check_already_connected()
+robot_state_t bt_check_already_connected()
 {
 	char c;
 
@@ -161,7 +167,7 @@ BT_MODE_ST bt_check_already_connected()
 	if(c != '\r')
 		return CONNECTED;
 
-	return CMD_MODE;
+	return DISCONNECTED;
 }
 
 void bt_wait_connected_status()
@@ -178,11 +184,11 @@ void bt_wait_connected_status()
 	{
 		while (	(buffer[i] = bt_get_noblock()) == 0 )
 		{
-			char c = usart1_get_noblock();
+			char c = tty_get_noblock();
 			if(c != 0)
 			{
 				bt_put(c);
-				uart1_put(c);
+				tty_put(c);
 			}
 		}
 
@@ -192,13 +198,51 @@ void bt_wait_connected_status()
 			int j;
 			//send what we received
 			for(j = 0 ; j <= i; ++j)
-				uart1_put(buffer[j]);
+				tty_put(buffer[j]);
 
 			//resume from the start of CONNECT
 			i = -1;
 		}
 	}
 
+}
+
+int bt_get_command(char * buffer)
+{
+	int i, j, k;
+
+	//start from previous char
+	i = u2rx.out-1;
+
+	if(u2rx.data[i] != '\r')
+	{
+		return 0;
+	}
+	else
+	{
+		// search command start
+		for(i = i - 1; i != u2rx.out; i = rb_dec_index(i) )
+		{
+			if(u2rx.data[i] == '\r')
+			{
+				i = rb_inc_index(i);
+				// if CR LF ending, skip LF
+				if(u2rx.data[i] == '\n')
+					i = rb_inc_index(i);
+				break;
+			}
+		}
+
+		// copy command to buffer
+		for(j = i, k = 0; rb_inc_index(j) != u2rx.out ; j = rb_inc_index(j), k++ )
+		{
+			buffer[k] = u2rx.data[j];
+		}
+
+		// put NULL at end of string
+		buffer[k] = '\0';
+		return 1;
+	}
 }
 
 

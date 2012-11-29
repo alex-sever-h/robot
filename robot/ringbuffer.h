@@ -14,13 +14,13 @@
 #define FAILURE 0
 #define SUCCESS 1
 
-#define USARTBUFFSIZE 1024
+#define USARTBUFFSIZE 48
 
 typedef struct{
-  u32 in;
-  u32 out;
-  u32 count;
-  u8 data[USARTBUFFSIZE];
+  volatile u32 in;
+  volatile u32 out;
+  //volatile u32 count;
+  volatile u8 data[USARTBUFFSIZE];
 }RINGBUFFER;
 
 
