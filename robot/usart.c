@@ -118,7 +118,7 @@ u8 tty_rx_empty(void)
 }
 
 
-void usart_puts(const char * string)
+void tty_puts(const char * string)
 {
 #ifdef BUFFERED
 	while(*string)

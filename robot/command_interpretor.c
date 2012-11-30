@@ -20,33 +20,37 @@ const char MOTOR_LR_CMD[] = "MLR";
 
 cmd_motor_lr_t cmd_motor_lr;
 
-int parameters[5];
-
 u32 command_queue;
 int cmd_index;
 
-int motor_lr(void);
-int motor_angle(void);
+int motor_lr(char *cmd_parameter);
+int motor_angle(char *cmd_parameter);
+
+const char m_lr[] = "M_LR";
+const char m_ang[] = "M_ANGLE";
+const char cnct[] = "CONNECT  ";
+const char discnct[] = "DISCONNECT  ";
+
 
 command_struct_t cmds[]=
 {
 		{
-				.cmd_str          = "M_LR",
+				.cmd_str          = m_lr,
 				.cmd_parameter_nr = 2,
 				.cmd_action       = motor_lr,
 		},
 		{
-				.cmd_str          = "M_ANGLE",
+				.cmd_str          = m_ang,
 				.cmd_parameter_nr = 2,
 				.cmd_action       = motor_angle,
 		},
 		{
-				.cmd_str          = "CONNECT",
+				.cmd_str          = cnct,
 				.cmd_parameter_nr = 15,
 				.cmd_action       = state_connect,
 		},
 		{
-				.cmd_str          = "DISCONNECT",
+				.cmd_str          = discnct,
 				.cmd_parameter_nr = 15,
 				.cmd_action       = state_disconnect,
 		}
@@ -71,16 +75,13 @@ int mySTRCMP(const char *s1, const char *s2)
 
 int check_command(command_struct_t *cmd, char * cmd_string)
 {
-	if(mySTRCMP(cmd_string, cmd->cmd_str) == 0)
+	if(strncmp(cmd_string, cmd->cmd_str, strlen(cmd->cmd_str)) == 0)
 	{
 		int i;
 
-		for(i = 0; i < cmd->cmd_parameter_nr; ++i)
-		{
-			parameters[i] = cmd_string[strlen(cmd->cmd_str) + i];
-		}
+		i = strlen(cmd->cmd_str);
 
-		cmd->cmd_action();
+		cmd->cmd_action(&cmd_string[i]);
 
 		return 1;
 	}
@@ -112,12 +113,19 @@ void interpret_byte(char cmd)
 }
 
 
-int motor_lr(void)
+int motor_lr(char *cmd_parameter)
 {
+  int left_pwn, right_pwm;
+  if(strlen(cmd_parameter) < 2)
+    return 0;
 
+  left_pwn  = cmd_parameter[0];
+  right_pwm = cmd_parameter[1];
+
+  motor_control_lr(left_pwn, right_pwm);
 }
 
-int motor_angle(void)
+int motor_angle(char *cmd_parameter)
 {
 
 }

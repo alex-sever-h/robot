@@ -47,8 +47,7 @@ int main(void)
 	bt_init(460800);
 	motor_init();
 
-
-	usart_puts("...... UART TEST ......\r\n");
+	tty_puts("...... TTY TEST ......\r\n");
 
 
 	gpio_set_mode(GPIOA,
@@ -58,13 +57,35 @@ int main(void)
 
 	gpio_clear(GPIOA, GPIO2 | GPIO3);
 
-
+	if (bt_check_already_connected())
+	  state_connect("'0000-00-000000'");
+	else
+	  state_disconnect("'0000-00-000000'");
 
 	while(1)
 	{
-		state_connect();
 		loop_states();
 	}
 
 	return 0;
 }
+
+//
+//
+//void hard_fault_handler(void)
+//{
+//	while(1);
+//}
+//
+//void mem_manage_handler(void)
+//{
+//	while(1);
+//}
+//void bus_fault_handler(void)
+//{
+//	while(1);
+//}
+//void usage_fault_handler(void)
+//{
+//	while(1);
+//}

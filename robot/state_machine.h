@@ -16,8 +16,8 @@ typedef enum bt_mode_st
 } robot_state_t;
 
 
-int  state_connect(void);
-int  state_disconnect(void);
+int  state_connect(char *cmd_parameter);
+int  state_disconnect(char *cmd_parameter);
 
 
 #endif /* STATE_MACHINE_H_ */

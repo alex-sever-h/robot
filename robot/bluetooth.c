@@ -138,7 +138,7 @@ void bt_puts(const char * string)
 	}
 }
 
-robot_state_t bt_check_already_connected()
+int bt_check_already_connected()
 {
 	char c;
 
@@ -157,17 +157,17 @@ robot_state_t bt_check_already_connected()
 	//check for OK response
 	c = bt_get_noblock();
 	if(c != 'O')
-		return CONNECTED;
+		return 1;
 
 	c = bt_get_noblock();
 	if(c != 'K')
-		return CONNECTED;
+		return 1;
 
 	c = bt_get_noblock();
 	if(c != '\r')
-		return CONNECTED;
+		return 1;
 
-	return DISCONNECTED;
+	return 0;
 }
 
 void bt_wait_connected_status()
@@ -223,7 +223,7 @@ int bt_get_command(char * buffer)
 		// search command start
 		for(i = i - 1; i != u2rx.out; i = rb_dec_index(i) )
 		{
-			if(u2rx.data[i] == '\r')
+			if(u2rx.data[i] == '\r' || u2rx.data[i] == '\0')
 			{
 				i = rb_inc_index(i);
 				// if CR LF ending, skip LF

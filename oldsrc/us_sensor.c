@@ -62,16 +62,16 @@ void check_us_sensor(int select_dir)
 		switch(select_dir)
 		{
 		case RIGHT:
-			usart_puts("RIGHT: ");
+			tty_puts("RIGHT: ");
 			break;
 		case LEFT:
-			usart_puts("LEFT : ");
+			tty_puts("LEFT : ");
 			break;
 		default:break;
 		}
 
-		usart_puts(buffer);
-		usart_puts("mm \n");
+		tty_puts(buffer);
+		tty_puts("mm \n");
 #endif
 
 		switch(select_dir)

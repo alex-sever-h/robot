@@ -19,8 +19,8 @@ typedef struct
 typedef struct
 {
 	 int cmd_parameter_nr;
-	 int (*cmd_action)(void);
-	 char cmd_str[];
+	 int (*cmd_action)(char *cmd_parameter);
+	 char *cmd_str;
 }command_struct_t;
 
 #endif /* COMMAND_INTERPRETOR_H_ */
