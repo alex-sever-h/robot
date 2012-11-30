@@ -38,6 +38,12 @@ void loop_states(void)
 
 						usart_puts("COMMAND: ");
 						usart_puts(buffer);
+
+						if (interpret_command(buffer))
+						{
+							usart_puts(" **** understood **** ");
+						}
+
 						tty_put('\r');
 					}
 				}
