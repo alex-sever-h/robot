@@ -134,7 +134,7 @@ int motor_lr(char *cmd_parameter)
       right_pwm = -right_pwm;
 
 
-  motor_control_lr(left_pwn, right_pwm);
+  motor_control_pwm(left_pwn, right_pwm);
 }
 
 int motor_angle(char *cmd_parameter)

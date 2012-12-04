@@ -54,23 +54,18 @@ def mainloop():
         for event in pygame.event.get():
             if (event.type == KEYDOWN):
                 if (event.key == K_UP):
-                    if (event.key == K_LEFT):
-                        print event
-                        go_forward_left()
-                    if (event.key == K_RIGHT):
-                        print event
-                        go_forward_right()
+                    
                     print event
                     go_forward()
                 if (event.key == K_DOWN):
-                    if (event.key == K_LEFT):
-                        print event
-                        go_backward_left()
-                    if (event.key == K_RIGHT):
-                        print event
-                        go_backward_right()
                     print event
                     go_backward()
+                if (event.key == K_LEFT):
+                    print event
+                    go_rotate_left()
+                if (event.key == K_RIGHT):
+                    print event
+                    go_rotate_right()
             if (event.type == KEYUP):
                 if (event.key == K_UP or event.key == K_DOWN or event.key == K_LEFT or event.key == K_RIGHT):
                     print event
@@ -115,14 +110,14 @@ def go_forward():
     sock.send(m_lr_command(+999, +999))
     pass
 
-def go_forward_left():
+def go_rotate_left():
     global sock
-    sock.send(m_lr_command(+500, +999))
+    sock.send(m_lr_command(-999, +999))
     pass
 
-def go_forward_right():
+def go_rotate_right():
     global sock
-    sock.send(m_lr_command(+999, +500))
+    sock.send(m_lr_command(+999, -999))
     pass
 
 def go_backward():

@@ -59,7 +59,7 @@ void motor_control_pwm(int left, int right)
 	if (left < 0)
 	{
 		gpio_set(GPIOC, GPIO10);
-		left = 1000 + left;
+		left = -left;
 	}
 	else
 	{
@@ -69,7 +69,7 @@ void motor_control_pwm(int left, int right)
 	if (right < 0)
 	{
 		gpio_set(GPIOC, GPIO11);
-		right = 1000 + right;
+		right = - right;
 	}
 	else
 	{
