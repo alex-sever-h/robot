@@ -116,11 +116,23 @@ void interpret_byte(char cmd)
 int motor_lr(char *cmd_parameter)
 {
   int left_pwn, right_pwm;
-  if(strlen(cmd_parameter) < 2)
+  if(strlen(cmd_parameter) < 8)
     return 0;
 
-  left_pwn  = cmd_parameter[0];
-  right_pwm = cmd_parameter[1];
+  left_pwn  =
+      (cmd_parameter[1] - '0') * 100 +
+      (cmd_parameter[2] - '0') * 10 +
+      (cmd_parameter[3] - '0');
+  if (cmd_parameter[0] == '-')
+    left_pwn = -left_pwn;
+
+  right_pwm  =
+        (cmd_parameter[5] - '0') * 100 +
+        (cmd_parameter[6] - '0') * 10 +
+        (cmd_parameter[7] - '0');
+    if (cmd_parameter[4] == '-')
+      right_pwm = -right_pwm;
+
 
   motor_control_lr(left_pwn, right_pwm);
 }
