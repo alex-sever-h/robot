@@ -58,22 +58,22 @@ void motor_control_pwm(int left, int right)
 	//set direction
 	if (left < 0)
 	{
-		gpio_set(GPIOC, GPIO10);
-		left = -left;
-	}
-	else
-	{
-		gpio_clear(GPIOC, GPIO10);
-	}
-
-	if (right < 0)
-	{
 		gpio_set(GPIOC, GPIO11);
-		right = - right;
+		left = 1000 + left;
 	}
 	else
 	{
 		gpio_clear(GPIOC, GPIO11);
+	}
+
+	if (right < 0)
+	{
+		gpio_set(GPIOC, GPIO10);
+		right = 1000 + right;
+	}
+	else
+	{
+		gpio_clear(GPIOC, GPIO10);
 	}
 
 	// calculate compare registers
