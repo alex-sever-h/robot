@@ -9,7 +9,7 @@
 #define GENERICS_H_
 
 int int_to_a(char * str, int number);
-void delay(u32 nCount);
+void delay_us(u32 nCount);
 
 
 #endif /* GENERICS_H_ */

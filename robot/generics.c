@@ -5,7 +5,6 @@
  *      Author: alexs
  */
 
-
 int int_to_a(char * str, int number)
 {
 
@@ -58,13 +57,4 @@ int int_to_a(char * str, int number)
 	}
 
 	return 0;
-}
-
-
-
-void delay(unsigned int  nCount)
-{
-	unsigned int i;
-	for(i = 0 ; i < nCount; i++)
-			__asm__("nop");
 }

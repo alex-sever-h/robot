@@ -3,7 +3,6 @@
 #include <libopencm3/stm32/f1/gpio.h>
 #include <libopencm3/stm32/usart.h>
 #include <libopencm3/cm3/nvic.h>
-#include <libopencm3/cm3/systick.h>
 #include "bluetooth.h"
 #include "ringbuffer.h"
 #include "generics.h"
@@ -141,18 +140,13 @@ void bt_puts(const char * string)
 int bt_check_already_connected()
 {
 	char c;
+	int i;
 
 	//send modem verification
 	bt_puts("AT\r");
 
-	//wait for response
-	/* 72MHz / 8 => 9000000 counts per second. */
-	systick_set_clocksource(STK_CTRL_CLKSOURCE_AHB_DIV8);
-	/* 9000000/9000 = 1000 overflows per second - every 1ms one interrupt */
-	systick_set_reload(900000);
-	/* Start counting. */
-	systick_counter_enable();
-	while (systick_get_value() > 1000);
+	for( i = 0 ; i < 1000000; ++i)
+	  delay_us(900);
 
 	//check for OK response
 	c = bt_get_noblock();

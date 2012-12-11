@@ -34,18 +34,21 @@ void clock_setup(void)
 
 	rcc_peripheral_enable_clock(&RCC_APB1ENR,
 			RCC_APB1ENR_USART3EN |
-			RCC_APB1ENR_TIM3EN );
+			RCC_APB1ENR_TIM3EN   |
+			RCC_APB1ENR_TIM2EN   );
 }
 
 
 int main(void)
 {
 	clock_setup();
+        systick_init();
 
 	//init peripherals
 	usart_init(921600);
 	bt_init(460800);
 	motor_init();
+	us_sensor_config();
 
 	tty_puts("...... TTY TEST ......\r\n");
 
@@ -56,6 +59,7 @@ int main(void)
 			GPIO2 | GPIO3);
 
 	gpio_clear(GPIOA, GPIO2 | GPIO3);
+
 
 	if (bt_check_already_connected())
 	  state_connect("'0000-00-000000'");
