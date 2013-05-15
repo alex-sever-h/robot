@@ -140,6 +140,7 @@ int motor_lr(char *cmd_parameter)
 int motor_angle(char *cmd_parameter)
 {
 
+	return 0;
 }
 
 inline int is_endchar(char c)

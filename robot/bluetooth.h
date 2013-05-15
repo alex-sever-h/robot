@@ -18,6 +18,6 @@ char bt_get(void);
 
 void bt_puts(const char * string);
 
-
+int bt_check_already_connected();
 
 #endif /* BLUETOOTH_H_ */

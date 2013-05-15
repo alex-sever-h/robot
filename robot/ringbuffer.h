@@ -14,7 +14,7 @@
 #define FAILURE 0
 #define SUCCESS 1
 
-#define USARTBUFFSIZE 48
+#define USARTBUFFSIZE 100
 
 typedef struct{
   volatile u32 in;

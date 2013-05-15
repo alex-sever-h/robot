@@ -20,48 +20,42 @@
 ## Modified by Alexandru-Sever Horin
 
 
-PREFIX	?= arm-eabi
-CC		= $(PREFIX)-gcc
-LD		= $(PREFIX)-gcc
+PREFIX		?= arm-eabi
+CC			= $(PREFIX)-gcc
+LD			= $(PREFIX)-gcc
 OBJCOPY		= $(PREFIX)-objcopy
 OBJDUMP		= $(PREFIX)-objdump
-GDB		= $(PREFIX)-gdb
+GDB			= $(PREFIX)-gdb
 
 TOOLCHAIN_DIR ?= /usr/arm-eabi
 ifeq ($(wildcard /usr/arm-eabi/lib/libopencm3_stm32f1.a),)
-$(info We found the libopenm3 library!)
+	$(info We found the libopenm3 library!)
 ifneq ($(strip $(shell which $(CC))),)
-TOOLCHAIN_DIR := $(shell dirname `which $(CC)`)/../$(PREFIX)
+	TOOLCHAIN_DIR := $(shell dirname `which $(CC)`)/../$(PREFIX)
 endif
 else
 ifeq ($(V),1)
-$(info We seem to be building the example in the source directory. Using local library!)
+	$(info We seem to be building the example in the source directory. Using local library!)
 endif
 endif
 
-ARCH_FLAGS      = -mthumb -mcpu=cortex-m3 -msoft-float
-CFLAGS		+= -O0 -g -Wall -Wextra -I$(TOOLCHAIN_DIR)/include \
-		   -fno-common $(ARCH_FLAGS) -MD -DSTM32F1
+
 LDSCRIPT	?= $(BINARY).ld
-LDFLAGS		+= \
-		   -L$(TOOLCHAIN_DIR)/lib/thumb \
-		   -T$(LDSCRIPT) -Wl,--gc-sections \
-		   $(ARCH_FLAGS) 
+ARCH_FLAGS  =  -mthumb -mcpu=cortex-m3 -msoft-float
+CFLAGS		+= -O0 -g -Wall -Wextra -I$(TOOLCHAIN_DIR)/include -fno-common $(ARCH_FLAGS) -MD -DSTM32F1
+LDFLAGS		+= -L$(TOOLCHAIN_DIR)/lib/thumb -T$(LDSCRIPT) -Wl,--gc-sections $(ARCH_FLAGS) 
 OBJS		+= $(BINARY).o
 
 OOCD	    	?= openocd
 OOCD_INTERFACE	?= jtagkey2
 OOCD_TARGET  	?= stm32f1x
-# Black magic probe specific variables
-# Set the BMP_PORT to a serial port and then BMP is used for flashing
-BMP_PORT        ?=
 
 # Be silent per default, but 'make V=1' will show all compiler calls.
 ifneq ($(V),1)
-Q := @
-NULL := 2>/dev/null
+	Q := @
+	NULL := 2>/dev/null
 else
-LDFLAGS += -Wl,--print-gc-sections
+	LDFLAGS += -Wl,--print-gc-sections
 endif
 
 .SUFFIXES: .elf .bin .hex .srec .list .images

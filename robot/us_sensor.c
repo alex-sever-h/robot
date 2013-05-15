@@ -7,33 +7,44 @@
 
 #include "usart.h"
 #include "generics.h"
+#include "us_sensor.h"
+
+typedef enum{
+	RISING,
+	FALLING
+} exti_t;
 
 
 volatile unsigned int f_left_distance;
 volatile unsigned int f_right_distance;
+volatile unsigned int r_left_distance;
+volatile unsigned int r_right_distance;
 
+volatile exti_t us_sensor_direction_f_l;
+volatile exti_t us_sensor_direction_f_r;
+volatile exti_t us_sensor_direction_r_l;
+volatile exti_t us_sensor_direction_r_r;
 
-#define RIGHT 1
-#define LEFT -1
-
-#define DEBUG 1
-
+volatile u16 us_sensor_timestamp_f_l;
+volatile u16 us_sensor_timestamp_f_r;
+volatile u16 us_sensor_timestamp_r_l;
+volatile u16 us_sensor_timestamp_r_r;
 
 
 void init_counter_sensor()
 {
-  uint32_t prescaler;
+	uint32_t prescaler;
 
-  prescaler = rcc_ppre2_frequency / 170000;
+	prescaler = rcc_ppre2_frequency / 170000;
 
-  timer_disable_counter(TIM2);
-  timer_reset(TIM2);
+	timer_disable_counter(TIM2);
+	timer_reset(TIM2);
 
-  timer_set_mode(TIM2, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
-  timer_continuous_mode(TIM2);
-  timer_set_prescaler(TIM2, prescaler);
+	timer_set_mode(TIM2, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
+	timer_continuous_mode(TIM2);
+	timer_set_prescaler(TIM2, prescaler);
 
-  timer_enable_counter(TIM2);
+	timer_enable_counter(TIM2);
 
 }
 
@@ -41,107 +52,154 @@ void init_counter_sensor()
 
 void us_sensor_config(void)
 {
-  init_counter_sensor();
+	init_counter_sensor();
 
-  // configure trigger pins
-  gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL,
-      GPIO12 | GPIO15);
-  gpio_clear(GPIOB, GPIO12 | GPIO15);
+	// configure trigger pin
+	gpio_set_mode(US_SENSOR_GPIO, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL,
+			US_SENSOR_TRIG);
+	gpio_clear(US_SENSOR_GPIO, US_SENSOR_TRIG);
 
-  // configure echo pins
-  gpio_set_mode(GPIOC, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,
-      GPIO0 | GPIO1);
+	// configure echo pins
+	gpio_set_mode(US_SENSOR_GPIO, GPIO_MODE_INPUT, GPIO_CNF_INPUT_FLOAT,
+			US_SENSOR_ECHO);
 
-  //enable einterrupts
-  nvic_enable_irq(NVIC_EXTI0_IRQ);
-  nvic_enable_irq(NVIC_EXTI1_IRQ);
+	//enable einterrupts
+	nvic_enable_irq(NVIC_EXTI9_5_IRQ);
 
-  exti_select_source(EXTI0, GPIOC);
-  exti_select_source(EXTI1, GPIOC);
-  exti_set_trigger(EXTI0, EXTI_TRIGGER_BOTH);
-  exti_set_trigger(EXTI1, EXTI_TRIGGER_BOTH);
-  exti_enable_request(EXTI0);
-  exti_enable_request(EXTI1);
+	exti_select_source(EXTI5, US_SENSOR_GPIO);
+	exti_select_source(EXTI6, US_SENSOR_GPIO);
+	exti_select_source(EXTI7, US_SENSOR_GPIO);
+	exti_select_source(EXTI8, US_SENSOR_GPIO);
+	exti_set_trigger(EXTI5, EXTI_TRIGGER_RISING);
+	exti_set_trigger(EXTI6, EXTI_TRIGGER_RISING);
+	exti_set_trigger(EXTI7, EXTI_TRIGGER_RISING);
+	exti_set_trigger(EXTI8, EXTI_TRIGGER_RISING);
+	exti_enable_request(EXTI5);
+	exti_enable_request(EXTI6);
+	exti_enable_request(EXTI7);
+	exti_enable_request(EXTI8);
 
-}
-
-void us_sensor_trigger(int select_dir)
-{
-  switch(select_dir)
-  {
-  case LEFT:{
-    gpio_set(GPIOB, GPIO15);
-    delay_us(10);
-    gpio_clear(GPIOB, GPIO15);
-  }break;
-  case RIGHT:{
-    gpio_set(GPIOB, GPIO12);
-    delay_us(10);
-    gpio_clear(GPIOB, GPIO12);
-  }break;
-  default:break;
-  }
-}
-
-
-void check_us_sensor(int select_dir)
-{
-  int ctr;
-
-  if ( gpio_get(GPIOC, GPIO0 | GPIO1) )
-    {
-      timer_set_counter(TIM2, 0);
-      ctr = timer_get_counter(TIM2);
-      bt_put((char)ctr);
-    }
-  else
-    {
-      u16 ctr;
-      ctr = timer_get_counter(TIM2);
-#if DEBUG
-
-      char buffer[30];
-      int_to_a(buffer, ctr);
-
-      switch(select_dir)
-      {
-      case RIGHT:
-        bt_puts("RIGHT: ");
-        break;
-      case LEFT:
-        bt_puts("LEFT : ");
-        break;
-      default:break;
-      }
-
-      bt_puts(buffer);
-      bt_puts("mm \n");
-#endif
-
-      switch(select_dir)
-      {
-      case RIGHT:
-        f_right_distance = ctr;
-        break;
-      case LEFT:
-        f_left_distance = ctr;
-        break;
-      default:break;
-      }
-
-    }
+	us_sensor_direction_f_l = RISING;
+	us_sensor_direction_f_r = RISING;
+	us_sensor_direction_r_l = RISING;
+	us_sensor_direction_r_r = RISING;
 
 }
 
-void exti0_isr(void)
+void us_sensor_trigger()
 {
-  check_us_sensor(RIGHT);
-  exti_reset_request(EXTI0);
+	gpio_set(US_SENSOR_GPIO, US_SENSOR_TRIG);
+	delay_us(10);
+	gpio_clear(US_SENSOR_GPIO, US_SENSOR_TRIG);
+	timer_set_counter(TIM2, 0);
 }
-void exti1_isr(void)
+
+volatile int up_fl = 0;
+volatile int up_fr = 0;
+volatile int up_rl = 0;
+volatile int up_rr = 0;
+
+
+
+void check_us_sensor()
 {
-  check_us_sensor(LEFT);
-  exti_reset_request(EXTI1);
+	if(exti_get_flag_status(EXTI5))
+	{
+		EXTI_PR = EXTI5;
+		switch(us_sensor_direction_f_l)
+		{
+		case RISING:
+			us_sensor_timestamp_f_l = timer_get_counter(TIM2);
+			exti_set_trigger(EXTI5, EXTI_TRIGGER_FALLING);
+			us_sensor_direction_f_l = FALLING;
+			break;
+		case FALLING:
+			f_left_distance = timer_get_counter(TIM2) - us_sensor_timestamp_f_l;
+			exti_set_trigger(EXTI5, EXTI_TRIGGER_RISING);
+			us_sensor_direction_f_l = RISING;
+			up_fl++;
+			break;
+		default:
+			break;
+		}
+//		up_fl++;
+//		exti_reset_request(EXTI5);
+	}
+
+	if(exti_get_flag_status(EXTI6))
+	{
+		EXTI_PR = EXTI6;
+		switch(us_sensor_direction_f_r)
+		{
+		case RISING:
+			us_sensor_timestamp_f_r = timer_get_counter(TIM2);
+			exti_set_trigger(EXTI6, EXTI_TRIGGER_FALLING);
+			us_sensor_direction_f_r = FALLING;
+			break;
+		case FALLING:
+			f_right_distance = timer_get_counter(TIM2) - us_sensor_timestamp_f_r;
+			exti_set_trigger(EXTI6, EXTI_TRIGGER_RISING);
+			us_sensor_direction_f_r = RISING;
+			up_fr++;
+			break;
+		default:
+			break;
+		}
+//		up_fr++;
+//		exti_reset_request(EXTI6);
+	}
+
+	if(exti_get_flag_status(EXTI7))
+	{
+		EXTI_PR = EXTI7;
+		switch(us_sensor_direction_r_l)
+		{
+		case RISING:
+			us_sensor_timestamp_r_l = timer_get_counter(TIM2);
+			exti_set_trigger(EXTI7, EXTI_TRIGGER_FALLING);
+			us_sensor_direction_r_l = FALLING;
+			up_rl++;
+			break;
+		case FALLING:
+			r_left_distance = timer_get_counter(TIM2) - us_sensor_timestamp_r_l;
+			exti_set_trigger(EXTI7, EXTI_TRIGGER_RISING);
+			us_sensor_direction_r_l = RISING;
+			break;
+		default:
+			break;
+		}
+//		up_rl++;
+//		exti_reset_request(EXTI7);
+	}
+
+	if(exti_get_flag_status(EXTI8))
+	{
+		EXTI_PR = EXTI8;
+		switch(us_sensor_direction_r_r)
+		{
+		case RISING:
+			us_sensor_timestamp_r_r = timer_get_counter(TIM2);
+			exti_set_trigger(EXTI8, EXTI_TRIGGER_FALLING);
+			us_sensor_direction_r_r = FALLING;
+			break;
+		case FALLING:
+			r_right_distance = timer_get_counter(TIM2) - us_sensor_timestamp_r_r;
+			exti_set_trigger(EXTI8, EXTI_TRIGGER_RISING);
+			us_sensor_direction_r_r = RISING;
+			up_rr++;
+			break;
+		default:
+			break;
+		}
+//		up_rr++;
+//		exti_reset_request(EXTI8);
+	}
+
+}
+
+void exti9_5_isr(void)
+{
+	check_us_sensor();
 }
 
 

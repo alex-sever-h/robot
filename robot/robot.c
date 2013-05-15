@@ -12,8 +12,9 @@
 
 #include "usart.h"
 #include "bluetooth.h"
-//#include "us_sensor.h"
+#include "us_sensor.h"
 #include "motor_ctrl.h"
+#include "systick.h"
 //#include "pin_config.h"
 
 
@@ -42,15 +43,17 @@ void clock_setup(void)
 int main(void)
 {
 	clock_setup();
-        systick_init();
+	motor_init();
 
 	//init peripherals
 	usart_init(921600);
 	bt_init(460800);
 	motor_init();
-	us_sensor_config();
 
-	tty_puts("...... TTY TEST ......\r\n");
+	us_sensor_config();
+	systick_init();
+
+	tty_puts("TTY TEST\r\n");
 
 
 	gpio_set_mode(GPIOA,
@@ -58,17 +61,25 @@ int main(void)
 			GPIO_CNF_OUTPUT_PUSHPULL,
 			GPIO2 | GPIO3);
 
-	gpio_clear(GPIOA, GPIO2 | GPIO3);
+	gpio_set(GPIOA, GPIO2 | GPIO3);
 
 
-	if (bt_check_already_connected())
-	  state_connect("'0000-00-000000'");
-	else
-	  state_disconnect("'0000-00-000000'");
+
+
+
+		if (bt_check_already_connected())
+			state_connect("'0000-00-000000'");
+		else
+			state_disconnect("'0000-00-000000'");
+
+		while(1)
+		{
+			loop_states();
+		}
 
 	while(1)
 	{
-		loop_states();
+
 	}
 
 	return 0;

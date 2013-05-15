@@ -9,6 +9,8 @@
 #include <libopencm3/stm32/timer.h>
 #include "motor_ctrl.h"
 
+#define MOTOR_RESOLUTION 1000
+
 static u16 timer_period;
 static u16 motor_front_left;
 static u16 motor_rear_left;
@@ -16,7 +18,7 @@ static u16 motor_front_rigth;
 static u16 motor_rear_rigth;
 
 
-inline u16 get_oc_value(u32 percet, u32 percentage)
+static inline u16 get_oc_value(u32 percet, u32 percentage)
 {
 	return  (( (u32) percet * (timer_period - 1)) / percentage);
 }
@@ -34,10 +36,10 @@ void motor_GPIO_config(void)
 	gpio_set_mode(GPIOC,
 			GPIO_MODE_OUTPUT_50_MHZ,
 			GPIO_CNF_OUTPUT_ALTFN_PUSHPULL,
-			GPIO_TIM3_FR_CH1 |
-			GPIO_TIM3_FR_CH2 |
-			GPIO_TIM3_FR_CH3 |
-			GPIO_TIM3_FR_CH4 );
+			MOTOR_GPIO_PWM_FRONT_L |
+			MOTOR_GPIO_PWM_FRONT_R |
+			MOTOR_GPIO_PWM_REAR_L |
+			MOTOR_GPIO_PWM_REAR_R );
 
 	// remap TIM3 to PCx pins
 	gpio_primary_remap(AFIO_MAPR_SWJ_CFG_FULL_SWJ, AFIO_MAPR_TIM3_REMAP_FULL_REMAP);
@@ -46,47 +48,64 @@ void motor_GPIO_config(void)
 	gpio_set_mode(GPIOC,
 			GPIO_MODE_OUTPUT_50_MHZ,
 			GPIO_CNF_OUTPUT_PUSHPULL,
-			GPIO10 |
-			GPIO11 );
+			MOTOR_DIR_L_1 |
+			MOTOR_DIR_L_2 |
+			MOTOR_DIR_R_1 |
+			MOTOR_DIR_R_2);
 
-	gpio_clear(GPIOC, GPIO10 | GPIO11);
+	gpio_clear(GPIOC, MOTOR_DIR_L_1 | MOTOR_DIR_L_2 | MOTOR_DIR_R_1 | MOTOR_DIR_R_2);
 
 }
 
 void motor_control_pwm(int left, int right)
 {
 	//set direction
-	if (left < 0)
+	if (left == 0)
 	{
-		gpio_set(GPIOC, GPIO11);
-		left = 1000 + left;
+		gpio_clear(GPIOC, MOTOR_DIR_L_1 | MOTOR_DIR_L_2);
+
+	}
+	else if (left < 0)
+	{
+		gpio_set  (GPIOC, MOTOR_DIR_L_1);
+		gpio_clear(GPIOC, MOTOR_DIR_L_2);
+		left = -left;
 	}
 	else
 	{
-		gpio_clear(GPIOC, GPIO11);
+		gpio_set  (GPIOC, MOTOR_DIR_L_2);
+		gpio_clear(GPIOC, MOTOR_DIR_L_1);
 	}
 
-	if (right < 0)
+	//set direction
+	if (right == 0)
 	{
-		gpio_set(GPIOC, GPIO10);
-		right = 1000 + right;
+		gpio_clear(GPIOC, MOTOR_DIR_R_1 | MOTOR_DIR_R_2);
+
+	}
+	else if (right < 0)
+	{
+		gpio_set  (GPIOC, MOTOR_DIR_R_1);
+		gpio_clear(GPIOC, MOTOR_DIR_R_2);
+		right = -right;
 	}
 	else
 	{
-		gpio_clear(GPIOC, GPIO10);
+		gpio_set  (GPIOC, MOTOR_DIR_R_2);
+		gpio_clear(GPIOC, MOTOR_DIR_R_1);
 	}
 
 	// calculate compare registers
-	motor_front_left = get_oc_value( left  , 1000);
-	motor_rear_left = get_oc_value( left  , 1000);
-	motor_front_rigth = get_oc_value( right , 1000);
-	motor_rear_rigth = get_oc_value( right , 1000);
+	motor_front_left  = get_oc_value( left  , MOTOR_RESOLUTION);
+	motor_rear_left   = get_oc_value( left  , MOTOR_RESOLUTION);
+	motor_front_rigth = get_oc_value( right , MOTOR_RESOLUTION);
+	motor_rear_rigth  = get_oc_value( right , MOTOR_RESOLUTION);
 
 	// Set the capture compare value
-	timer_set_oc_value(TIM3, TIM_OC1, motor_front_left);
-	timer_set_oc_value(TIM3, TIM_OC2, motor_rear_left);
-	timer_set_oc_value(TIM3, TIM_OC3, motor_front_rigth);
-	timer_set_oc_value(TIM3, TIM_OC4, motor_rear_rigth);
+	timer_set_oc_value(TIM3, MOTOR_PWM_FRONT_LEFT,  motor_front_left);
+	timer_set_oc_value(TIM3, MOTOR_PWM_REAR_LEFT,   motor_rear_left);
+	timer_set_oc_value(TIM3, MOTOR_PWM_FRONT_RIGHT, motor_front_rigth);
+	timer_set_oc_value(TIM3, MOTOR_PWM_REAR_RIGHT,  motor_rear_rigth);
 
 }
 /** Directly control motor left and right PWM in 128 steps
@@ -96,8 +115,8 @@ void motor_control_lr(int left, int right)
 	int left_pwm;
 	int right_pwm;
 
-	left_pwm = 1000 * left / 128;
-	right_pwm = 1000 * right / 128;
+	left_pwm = MOTOR_RESOLUTION * left / 128;
+	right_pwm = MOTOR_RESOLUTION * right / 128;
 
 	motor_control_pwm(left_pwm, right_pwm);
 }
@@ -161,51 +180,51 @@ void motor_TIMER_config(void)
 	/* Reset prescaler value. */
 	timer_set_prescaler(TIM3, 0);
 
-	motor_front_left  = get_oc_value( 0 , 1000);
-	motor_rear_left   = get_oc_value( 0 , 1000);
-	motor_front_rigth = get_oc_value( 0 , 1000);
-	motor_rear_rigth  = get_oc_value( 0 , 1000);
+	motor_front_left  = 0;
+	motor_rear_left   = 0;
+	motor_front_rigth = 0;
+	motor_rear_rigth  = 0;
 
 	/************ channels configuration ************/
 
-	timer_disable_oc_output(TIM3, TIM_OC1);
-	timer_disable_oc_output(TIM3, TIM_OC2);
-	timer_disable_oc_output(TIM3, TIM_OC3);
-	timer_disable_oc_output(TIM3, TIM_OC4);
+	timer_disable_oc_output(TIM3, MOTOR_PWM_REAR_LEFT);
+	timer_disable_oc_output(TIM3, MOTOR_PWM_FRONT_LEFT);
+	timer_disable_oc_output(TIM3, MOTOR_PWM_REAR_RIGHT);
+	timer_disable_oc_output(TIM3, MOTOR_PWM_FRONT_RIGHT);
 
 	//configure OCx line
-	timer_set_oc_slow_mode(TIM3, TIM_OC1);
-	timer_set_oc_slow_mode(TIM3, TIM_OC2);
-	timer_set_oc_slow_mode(TIM3, TIM_OC3);
-	timer_set_oc_slow_mode(TIM3, TIM_OC4);
+	timer_set_oc_slow_mode(TIM3, MOTOR_PWM_REAR_LEFT);
+	timer_set_oc_slow_mode(TIM3, MOTOR_PWM_FRONT_LEFT);
+	timer_set_oc_slow_mode(TIM3, MOTOR_PWM_REAR_RIGHT);
+	timer_set_oc_slow_mode(TIM3, MOTOR_PWM_FRONT_RIGHT);
 
-	timer_set_oc_mode(TIM3, TIM_OC1, TIM_OCM_PWM1);
-	timer_set_oc_mode(TIM3, TIM_OC2, TIM_OCM_PWM1);
-	timer_set_oc_mode(TIM3, TIM_OC3, TIM_OCM_PWM1);
-	timer_set_oc_mode(TIM3, TIM_OC4, TIM_OCM_PWM1);
+	timer_set_oc_mode(TIM3, MOTOR_PWM_REAR_LEFT, TIM_OCM_PWM1);
+	timer_set_oc_mode(TIM3, MOTOR_PWM_FRONT_LEFT, TIM_OCM_PWM1);
+	timer_set_oc_mode(TIM3, MOTOR_PWM_REAR_RIGHT, TIM_OCM_PWM1);
+	timer_set_oc_mode(TIM3, MOTOR_PWM_FRONT_RIGHT, TIM_OCM_PWM1);
 
 	//configure OCx output
-	timer_set_oc_polarity_high(TIM3, TIM_OC1);
-	timer_set_oc_polarity_high(TIM3, TIM_OC2);
-	timer_set_oc_polarity_high(TIM3, TIM_OC3);
-	timer_set_oc_polarity_high(TIM3, TIM_OC4);
+	timer_set_oc_polarity_high(TIM3, MOTOR_PWM_REAR_LEFT);
+	timer_set_oc_polarity_high(TIM3, MOTOR_PWM_FRONT_LEFT);
+	timer_set_oc_polarity_high(TIM3, MOTOR_PWM_REAR_RIGHT);
+	timer_set_oc_polarity_high(TIM3, MOTOR_PWM_FRONT_RIGHT);
 
-	timer_set_oc_idle_state_set(TIM3, TIM_OC1);
-	timer_set_oc_idle_state_set(TIM3, TIM_OC2);
-	timer_set_oc_idle_state_set(TIM3, TIM_OC3);
-	timer_set_oc_idle_state_set(TIM3, TIM_OC4);
+	timer_set_oc_idle_state_set(TIM3, MOTOR_PWM_REAR_LEFT);
+	timer_set_oc_idle_state_set(TIM3, MOTOR_PWM_FRONT_LEFT);
+	timer_set_oc_idle_state_set(TIM3, MOTOR_PWM_REAR_RIGHT);
+	timer_set_oc_idle_state_set(TIM3, MOTOR_PWM_FRONT_RIGHT);
 
 	/* Set the capture compare value */
-	timer_set_oc_value(TIM3, TIM_OC1, motor_front_left);
-	timer_set_oc_value(TIM3, TIM_OC2, motor_rear_left);
-	timer_set_oc_value(TIM3, TIM_OC3, motor_front_rigth);
-	timer_set_oc_value(TIM3, TIM_OC4, motor_rear_rigth);
+	timer_set_oc_value(TIM3, MOTOR_PWM_FRONT_LEFT,  motor_front_left);
+	timer_set_oc_value(TIM3, MOTOR_PWM_REAR_LEFT,   motor_rear_left);
+	timer_set_oc_value(TIM3, MOTOR_PWM_FRONT_RIGHT, motor_front_rigth);
+	timer_set_oc_value(TIM3, MOTOR_PWM_REAR_RIGHT,  motor_rear_rigth);
 
 
-	timer_enable_oc_output(TIM3, TIM_OC1);
-	timer_enable_oc_output(TIM3, TIM_OC2);
-	timer_enable_oc_output(TIM3, TIM_OC3);
-	timer_enable_oc_output(TIM3, TIM_OC4);
+	timer_enable_oc_output(TIM3, MOTOR_PWM_REAR_LEFT);
+	timer_enable_oc_output(TIM3, MOTOR_PWM_FRONT_LEFT);
+	timer_enable_oc_output(TIM3, MOTOR_PWM_REAR_RIGHT);
+	timer_enable_oc_output(TIM3, MOTOR_PWM_FRONT_RIGHT);
 
 	timer_enable_counter(TIM3);
 
