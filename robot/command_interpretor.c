@@ -133,7 +133,6 @@ int motor_lr(char *cmd_parameter)
     if (cmd_parameter[4] == '-')
       right_pwm = -right_pwm;
 
-
   motor_control_pwm(left_pwn, right_pwm);
 }
 

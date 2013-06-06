@@ -19,5 +19,7 @@ typedef enum bt_mode_st
 int  state_connect(char *cmd_parameter);
 int  state_disconnect(char *cmd_parameter);
 
+int  is_connected();
+
 
 #endif /* STATE_MACHINE_H_ */

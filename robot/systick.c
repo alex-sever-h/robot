@@ -7,6 +7,8 @@
 #include <libopencm3/stm32/f1/rcc.h>
 #include <libopencm3/cm3/systick.h>
 #include "us_sensor.h"
+#include "state_machine.h"
+#include <stdio.h>
 
 u32 temp32;
 
@@ -32,55 +34,32 @@ void sys_tick_handler(void)
 	temp32++;
 
 	/* We call this handler every 1ms so 1000ms = 1s on/off. */
-	char buffer[30];
+	char buffer[100];
 
-//	if (!(temp32 % 1600))
-//	{
-//		tty_puts("F_L : ");
-//		int_to_a(buffer, up_fl);
-//		tty_puts(buffer);
-//		tty_puts("++ \r\n");
-//
-//		tty_puts("F_R : ");
-//		int_to_a(buffer, up_fr);
-//		tty_puts(buffer);
-//		tty_puts("++ \r\n");
-//
-//		tty_puts("R_L : ");
-//		int_to_a(buffer, up_rl);
-//		tty_puts(buffer);
-//		tty_puts("++ \r\n");
-//
-//		tty_puts("R_R : ");
-//		int_to_a(buffer, up_rr);
-//		tty_puts(buffer);
-//		tty_puts("++ \r\n");
-//	}
-
-	if (!(temp32 % 250))
+	if (!(temp32 % 100) && is_connected())
 	{
-		tty_puts("F_R : ");
-		int_to_a(buffer, f_right_distance);
-		tty_puts(buffer);
-		tty_puts("mm \r\n");
+		bt_puts("F_R : ");
+		int_to_a(buffer, (int)f_right_distance);
+		bt_puts(buffer);
+		bt_puts("mm\n");
 
-		tty_puts("F_L : ");
-		int_to_a(buffer, f_left_distance);
-		tty_puts(buffer);
-		tty_puts("mm \r\n");
+		bt_puts("F_L : ");
+		int_to_a(buffer, (int)f_left_distance);
+		bt_puts(buffer);
+		bt_puts("mm\n");
 
-		tty_puts("R_R : ");
-		int_to_a(buffer, r_right_distance);
-		tty_puts(buffer);
-		tty_puts("mm \r\n");
+		bt_puts("R_R : ");
+		int_to_a(buffer, (int)r_right_distance);
+		bt_puts(buffer);
+		bt_puts("mm\n");
 
-		tty_puts("R_L : ");
-		int_to_a(buffer, r_left_distance);
-		tty_puts(buffer);
-		tty_puts("mm \r\n");
+		bt_puts("R_L : ");
+		int_to_a(buffer, (int)r_left_distance);
+		bt_puts(buffer);
+		bt_puts("mm\n\n");
 	}
 
-	if (!(temp32 % 300))
+	if (!(temp32 % 250))
 	{
 		us_sensor_trigger(RIGHT);
 	}

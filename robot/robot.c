@@ -16,7 +16,7 @@
 #include "motor_ctrl.h"
 #include "systick.h"
 //#include "pin_config.h"
-
+#include <stdio.h>
 
 
 void clock_setup(void)
@@ -51,7 +51,11 @@ int main(void)
 	motor_init();
 
 	us_sensor_config();
-	systick_init();
+
+	char buffer[50];
+	sprintf(buffer, "TTY_TEST\r\n");
+
+	bt_puts(buffer);
 
 	tty_puts("TTY TEST\r\n");
 
@@ -64,18 +68,19 @@ int main(void)
 	gpio_set(GPIOA, GPIO2 | GPIO3);
 
 
+	if (bt_check_already_connected())
+	{
+		state_connect("'0000-00-000000'");
+	}
+	else
+		state_disconnect("'0000-00-000000'");
 
+	systick_init();
 
-
-		if (bt_check_already_connected())
-			state_connect("'0000-00-000000'");
-		else
-			state_disconnect("'0000-00-000000'");
-
-		while(1)
-		{
-			loop_states();
-		}
+	while(1)
+	{
+		loop_states();
+	}
 
 	while(1)
 	{
@@ -84,23 +89,3 @@ int main(void)
 
 	return 0;
 }
-
-//
-//
-//void hard_fault_handler(void)
-//{
-//	while(1);
-//}
-//
-//void mem_manage_handler(void)
-//{
-//	while(1);
-//}
-//void bus_fault_handler(void)
-//{
-//	while(1);
-//}
-//void usage_fault_handler(void)
-//{
-//	while(1);
-//}

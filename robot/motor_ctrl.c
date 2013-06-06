@@ -9,7 +9,7 @@
 #include <libopencm3/stm32/timer.h>
 #include "motor_ctrl.h"
 
-#define MOTOR_RESOLUTION 1000
+#define MOTOR_RESOLUTION 500
 
 static u16 timer_period;
 static u16 motor_front_left;

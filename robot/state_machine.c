@@ -98,3 +98,11 @@ int  state_disconnect(char *cmd_parameter)
     }
   return 0;
 }
+
+int  is_connected()
+{
+	if(robot_state == CONNECTED)
+		return 1;
+	else
+		return 0;
+}
