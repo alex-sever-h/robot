@@ -34,34 +34,34 @@ void sys_tick_handler(void)
 	temp32++;
 
 	/* We call this handler every 1ms so 1000ms = 1s on/off. */
-	char buffer[100];
+//	char buffer[100];
+//
+//	if (!(temp32 % 100) && is_connected())
+//	{
+//		bt_puts("F_R : ");
+//		int_to_a(buffer, (int)f_right_distance);
+//		bt_puts(buffer);
+//		bt_puts("mm\n");
+//
+//		bt_puts("F_L : ");
+//		int_to_a(buffer, (int)f_left_distance);
+//		bt_puts(buffer);
+//		bt_puts("mm\n");
+//
+//		bt_puts("R_R : ");
+//		int_to_a(buffer, (int)r_right_distance);
+//		bt_puts(buffer);
+//		bt_puts("mm\n");
+//
+//		bt_puts("R_L : ");
+//		int_to_a(buffer, (int)r_left_distance);
+//		bt_puts(buffer);
+//		bt_puts("mm\n\n");
+//	}
 
-	if (!(temp32 % 100) && is_connected())
+	if (!(temp32 % 100))
 	{
-		bt_puts("F_R : ");
-		int_to_a(buffer, (int)f_right_distance);
-		bt_puts(buffer);
-		bt_puts("mm\n");
-
-		bt_puts("F_L : ");
-		int_to_a(buffer, (int)f_left_distance);
-		bt_puts(buffer);
-		bt_puts("mm\n");
-
-		bt_puts("R_R : ");
-		int_to_a(buffer, (int)r_right_distance);
-		bt_puts(buffer);
-		bt_puts("mm\n");
-
-		bt_puts("R_L : ");
-		int_to_a(buffer, (int)r_left_distance);
-		bt_puts(buffer);
-		bt_puts("mm\n\n");
-	}
-
-	if (!(temp32 % 250))
-	{
-		us_sensor_trigger(RIGHT);
+		us_sensor_trigger();
 	}
 }
 
