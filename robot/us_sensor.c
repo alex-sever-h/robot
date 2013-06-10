@@ -40,13 +40,13 @@ t_sensor sensors[] =
 						.exti = EXTI8, .trig_gpio = GPIOB,
 						.trig_gpio_n = GPIO15, .distance = 0, },
 				//left sensors
-				{ .id = "RI_C", .echo_gpio = GPIOB, .echo_gpio_n = GPIO9,
+				{ .id = "LE_C", .echo_gpio = GPIOB, .echo_gpio_n = GPIO9,
 						.exti = EXTI9, .trig_gpio = GPIOB,
 						.trig_gpio_n = GPIO12, .distance = 0, },
-				{ .id = "RI_F", .echo_gpio = GPIOA, .echo_gpio_n = GPIO11,
+				{ .id = "LE_F", .echo_gpio = GPIOA, .echo_gpio_n = GPIO11,
 						.exti = EXTI11, .trig_gpio = GPIOC, .trig_gpio_n =
 								GPIO12, .distance = 0, },
-				{ .id = "RI_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO12,
+				{ .id = "LE_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO12,
 						.exti = EXTI12, .trig_gpio = GPIOB, .trig_gpio_n =
 								GPIO15, .distance = 0, }, };
 
