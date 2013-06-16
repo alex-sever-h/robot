@@ -105,19 +105,11 @@ int interpret_command(char *cmd_buffer)
 }
 
 
-void interpret_byte(char cmd)
-{
-
-
-
-}
-
-
 int motor_lr(char *cmd_parameter)
 {
   int left_pwn, right_pwm;
-  if(strlen(cmd_parameter) < 8)
-    return 0;
+//  if(strlen(cmd_parameter) < 8)
+//    return 0;
 
   left_pwn  =
       (cmd_parameter[1] - '0') * 100 +
@@ -134,6 +126,8 @@ int motor_lr(char *cmd_parameter)
       right_pwm = -right_pwm;
 
   motor_control_pwm(left_pwn, right_pwm);
+
+  return 1;
 }
 
 int motor_angle(char *cmd_parameter)

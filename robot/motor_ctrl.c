@@ -172,11 +172,14 @@ void motor_TIMER_config(void)
 	timer_period = rcc_ppre1_frequency / 5000;
 
 	timer_reset(TIM3);
+
 	/* set timer mode  no divider ; alignment on edge ; direction up */
 	timer_set_mode(TIM3, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
 	timer_continuous_mode(TIM3);
+
 	/* Period (5kHz). TIM3 clk source is APB1*/
 	timer_set_period(TIM3, timer_period);
+
 	/* Reset prescaler value. */
 	timer_set_prescaler(TIM3, 0);
 

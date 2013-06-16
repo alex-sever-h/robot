@@ -31,7 +31,9 @@ void clock_setup(void)
 			RCC_APB2ENR_AFIOEN );
 
 	/* Enable clocks for GPIO port B (for GPIO_USART3_TX) and USART3. */
-	rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_USART1EN);
+	rcc_peripheral_enable_clock(&RCC_APB2ENR,
+			RCC_APB2ENR_USART1EN |
+			RCC_APB2ENR_TIM1EN   );
 
 	rcc_peripheral_enable_clock(&RCC_APB1ENR,
 			RCC_APB1ENR_USART3EN |
@@ -53,7 +55,7 @@ int main(void)
 	us_sensor_config();
 
 	char buffer[50];
-	sprintf(buffer, "TTY_TEST\r\n");
+//	sprintf(buffer, "TTY_TEST\r\n");
 
 	bt_puts(buffer);
 
@@ -77,6 +79,8 @@ int main(void)
 
 	systick_init();
 
+
+	//motor_control_pwm(999,999);
 	while(1)
 	{
 		loop_states();

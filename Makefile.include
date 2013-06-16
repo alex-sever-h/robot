@@ -40,10 +40,18 @@ endif
 endif
 
 
-LDSCRIPT	?= $(BINARY).ld
 ARCH_FLAGS  =  -mthumb -mcpu=cortex-m3 -msoft-float
-CFLAGS		+= -O0 -g -Wall -Wextra -I$(TOOLCHAIN_DIR)/include -fno-common $(ARCH_FLAGS) -MD -DSTM32F1
-LDFLAGS		+= -L$(TOOLCHAIN_DIR)/lib/thumb -T$(LDSCRIPT) -Wl,--gc-sections $(ARCH_FLAGS) 
+CFLAGS		+= -O0 -g \
+		   -Wall -Wextra -Wimplicit-function-declaration \
+		   -Wredundant-decls -Wmissing-prototypes -Wstrict-prototypes \
+		   -Wundef -Wshadow \
+		   -I$(TOOLCHAIN_DIR)/include \
+		   -fno-common $(ARCH_FLAGS) -MD -DSTM32F1
+LDSCRIPT	?= $(BINARY).ld
+LDFLAGS		+= --static -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group \
+		   -L$(TOOLCHAIN_DIR)/lib/thumb \
+		   -T$(LDSCRIPT) -nostartfiles -Wl,--gc-sections \
+		   $(ARCH_FLAGS) -mfix-cortex-m3-ldrd
 OBJS		+= $(BINARY).o
 
 OOCD	    	?= openocd

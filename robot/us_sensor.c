@@ -23,12 +23,12 @@ t_sensor sensors[] =
 				{ .id = "RE_C", .echo_gpio = GPIOC, .echo_gpio_n = GPIO3,
 						.exti = EXTI3, .trig_gpio = GPIOB,
 						.trig_gpio_n = GPIO12, .distance = 0, },
-				{ .id = "RE_L", .echo_gpio = GPIOA, .echo_gpio_n = GPIO5,
-						.exti = EXTI4, .trig_gpio = GPIOC,
-						.trig_gpio_n = GPIO12, .distance = 0, },
 				{ .id = "RE_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO4,
-						.exti = EXTI5, .trig_gpio = GPIOB,
+						.exti = EXTI4, .trig_gpio = GPIOB,
 						.trig_gpio_n = GPIO15, .distance = 0, },
+				{ .id = "RE_L", .echo_gpio = GPIOA, .echo_gpio_n = GPIO5,
+						.exti = EXTI5, .trig_gpio = GPIOC,
+						.trig_gpio_n = GPIO12, .distance = 0, },
 				//right sensors
 				{ .id = "RI_C", .echo_gpio = GPIOA, .echo_gpio_n = GPIO6,
 						.exti = EXTI6, .trig_gpio = GPIOB,
@@ -80,6 +80,13 @@ void us_sensor_config(void)
 	nvic_enable_irq(NVIC_EXTI4_IRQ);
 	nvic_enable_irq(NVIC_EXTI9_5_IRQ);
 	nvic_enable_irq(NVIC_EXTI15_10_IRQ);
+	nvic_set_priority(NVIC_EXTI0_IRQ, 255);
+	nvic_set_priority(NVIC_EXTI1_IRQ, 255);
+	nvic_set_priority(NVIC_EXTI2_IRQ, 255);
+	nvic_set_priority(NVIC_EXTI3_IRQ, 255);
+	nvic_set_priority(NVIC_EXTI4_IRQ, 255);
+	nvic_set_priority(NVIC_EXTI9_5_IRQ, 255);
+	nvic_set_priority(NVIC_EXTI15_10_IRQ, 255);
 
 	for (i = 0; i < sizeof(sensors) / sizeof(t_sensor); ++i)
 	{
