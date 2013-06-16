@@ -45,7 +45,6 @@ void clock_setup(void)
 int main(void)
 {
 	clock_setup();
-	motor_init();
 
 	//init peripherals
 	usart_init(921600);
@@ -54,13 +53,9 @@ int main(void)
 
 	us_sensor_config();
 
-	char buffer[50];
-//	sprintf(buffer, "TTY_TEST\r\n");
-
-	bt_puts(buffer);
-
 	tty_puts("TTY TEST\r\n");
 
+	bt_puts("BLUETOOTH TEST\r\n");
 
 	gpio_set_mode(GPIOA,
 			GPIO_MODE_OUTPUT_50_MHZ,
@@ -79,16 +74,9 @@ int main(void)
 
 	systick_init();
 
-
-	//motor_control_pwm(999,999);
 	while(1)
 	{
 		loop_states();
-	}
-
-	while(1)
-	{
-
 	}
 
 	return 0;
