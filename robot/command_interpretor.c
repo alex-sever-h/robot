@@ -12,10 +12,6 @@
 #include "command_interpretor.h"
 #include "libopencm3/cm3/common.h"
 
-#define MOTOR_LR_QUEUE 0x00000001
-const char MOTOR_LR_CMD[] = "MLR";
-
-
 #define END_CMD        '\r'
 
 cmd_motor_lr_t cmd_motor_lr;
@@ -25,10 +21,12 @@ int cmd_index;
 
 int motor_lr(char *cmd_parameter);
 int motor_angle(char *cmd_parameter);
+int motor_distance(char *cmd_parameter);
 
-const char m_lr[] = "M_LR";
+const char m_lr[]  = "M_LR";
+const char m_d[]   = "M_D";
 const char m_ang[] = "M_ANGLE";
-const char cnct[] = "CONNECT  ";
+const char cnct[]    = "CONNECT  ";
 const char discnct[] = "DISCONNECT  ";
 
 
@@ -38,6 +36,11 @@ command_struct_t cmds[]=
 				.cmd_str          = m_lr,
 				.cmd_parameter_nr = 2,
 				.cmd_action       = motor_lr,
+		},
+		{
+				.cmd_str          = m_d,
+				.cmd_parameter_nr = 1,
+				.cmd_action       = motor_distance,
 		},
 		{
 				.cmd_str          = m_ang,
@@ -107,27 +110,42 @@ int interpret_command(char *cmd_buffer)
 
 int motor_lr(char *cmd_parameter)
 {
-  int left_pwn, right_pwm;
-//  if(strlen(cmd_parameter) < 8)
-//    return 0;
+	int left_pwn, right_pwm;
+	//  if(strlen(cmd_parameter) < 8)
+	//    return 0;
 
-  left_pwn  =
-      (cmd_parameter[1] - '0') * 100 +
-      (cmd_parameter[2] - '0') * 10 +
-      (cmd_parameter[3] - '0');
-  if (cmd_parameter[0] == '-')
-    left_pwn = -left_pwn;
+	left_pwn  =
+			(cmd_parameter[1] - '0') * 100 +
+			(cmd_parameter[2] - '0') * 10 +
+			(cmd_parameter[3] - '0');
+	if (cmd_parameter[0] == '-')
+		left_pwn = -left_pwn;
 
-  right_pwm  =
-        (cmd_parameter[5] - '0') * 100 +
-        (cmd_parameter[6] - '0') * 10 +
-        (cmd_parameter[7] - '0');
-    if (cmd_parameter[4] == '-')
-      right_pwm = -right_pwm;
+	right_pwm  =
+			(cmd_parameter[5] - '0') * 100 +
+			(cmd_parameter[6] - '0') * 10 +
+			(cmd_parameter[7] - '0');
+	if (cmd_parameter[4] == '-')
+		right_pwm = -right_pwm;
 
-  motor_control_pwm(left_pwn, right_pwm);
+	motor_control_pwm(left_pwn, right_pwm);
 
-  return 1;
+	return 1;
+}
+
+int motor_distance(char *cmd_parameter)
+{
+	int distance;
+
+	distance =
+			(cmd_parameter[1] - '0') * 1000 +
+			(cmd_parameter[2] - '0') * 100 +
+			(cmd_parameter[3] - '0') * 10 +
+			(cmd_parameter[4] - '0');
+	if (cmd_parameter[0] == '-')
+		distance = -distance;
+
+	motor_control_distance(distance);
 }
 
 int motor_angle(char *cmd_parameter)

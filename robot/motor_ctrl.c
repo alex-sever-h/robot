@@ -6,6 +6,7 @@
  */
 #include <libopencm3/stm32/f1/gpio.h>
 #include <libopencm3/stm32/f1/rcc.h>
+#include <libopencm3/stm32/f1/nvic.h>
 #include <libopencm3/stm32/timer.h>
 #include "motor_ctrl.h"
 
@@ -26,7 +27,8 @@ static inline u16 get_oc_value(u32 percet, u32 percentage)
 void motor_init()
 {
 	motor_GPIO_config();
-	motor_TIMER_config();
+	motor_PWM_TIMER_config();
+	motor_DELAY_TIMER_config();
 	motor_control_pwm(0, 0);
 }
 
@@ -108,6 +110,14 @@ void motor_control_pwm(int left, int right)
 	timer_set_oc_value(TIM3, MOTOR_PWM_REAR_RIGHT,  motor_rear_rigth);
 
 }
+
+int motor_control_distance(int distance)
+{
+	motor_start_delay(abs(distance));
+
+	return 1;
+}
+
 /** Directly control motor left and right PWM in 128 steps
  */
 void motor_control_lr(int left, int right)
@@ -165,8 +175,71 @@ void motor_panic_stop()
 
 }
 
+int motor_DELAY_TIMER_config(void)
+{
+	nvic_enable_irq(NVIC_TIM1_UP_IRQ);
 
-void motor_TIMER_config(void)
+	timer_reset(TIM1);
+
+	/* set timer mode  no divider ; alignment on edge ; direction up */
+	timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
+
+
+	int timer_prescaler = (rcc_ppre2_frequency / 2) / 1000;
+
+	timer_set_prescaler(TIM1, timer_prescaler);
+	timer_set_period(TIM1, 2000);
+	timer_set_repetition_counter(TIM1, 0);
+	timer_disable_preload(TIM1);
+
+	timer_one_shot_mode(TIM1);
+
+	timer_enable_irq(TIM1, 0xFF);
+
+	return 1;
+}
+
+int motor_start_delay(int timeMs)
+{
+	timer_set_period(TIM1, timeMs);
+	timer_enable_counter(TIM1);
+}
+
+
+void tim1_brk_isr(void)
+{
+	timer_clear_flag(TIM1, TIM_DIER_UIE);
+
+	timer_disable_counter(TIM1);
+	bt_puts("end\n");
+}
+
+void tim1_up_isr(void)
+{
+	timer_clear_flag(TIM1, TIM_DIER_UIE);
+
+	timer_disable_counter(TIM1);
+	bt_puts("end\n");
+}
+
+void tim1_trg_com_isr(void)
+{
+	timer_clear_flag(TIM1, TIM_DIER_UIE);
+
+	timer_disable_counter(TIM1);
+	bt_puts("end\n");
+}
+
+void tim1_cc_isr(void)
+{
+	timer_clear_flag(TIM1, TIM_DIER_UIE);
+
+	timer_disable_counter(TIM1);
+	bt_puts("end\n");
+}
+
+
+void motor_PWM_TIMER_config(void)
 {
 
 	timer_period = rcc_ppre1_frequency / 5000;

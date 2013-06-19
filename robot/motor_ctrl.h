@@ -34,4 +34,6 @@ void motor_init(void);
 
 void motor_control_lr(int left, int right);
 
+int motor_control_distance(int distance);
+
 #endif /* MOTOR_CTRL_H_ */

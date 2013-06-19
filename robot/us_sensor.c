@@ -167,18 +167,18 @@ void check_us_sensor()
 		}
 	}
 
-	for (i = 0; i < sizeof(sensors) / sizeof(t_sensor); ++i)
-	{
-		if (sensors_updated & (1 << i))
-		{
-			char buffer[100];
-			bt_puts(sensors[i].id);
-			bt_puts(" : ");
-			uint_to_a(buffer, (int) sensors[i].distance);
-			bt_puts(buffer);
-			bt_puts("mm\n");
-		}
-	}
+//	for (i = 0; i < sizeof(sensors) / sizeof(t_sensor); ++i)
+//	{
+//		if (sensors_updated & (1 << i))
+//		{
+//			char buffer[100];
+//			bt_puts(sensors[i].id);
+//			bt_puts(" : ");
+//			uint_to_a(buffer, (int) sensors[i].distance);
+//			bt_puts(buffer);
+//			bt_puts("mm\n");
+//		}
+//	}
 }
 
 void exti0_isr(void)

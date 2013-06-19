@@ -37,6 +37,7 @@ void clock_setup(void)
 
 	rcc_peripheral_enable_clock(&RCC_APB1ENR,
 			RCC_APB1ENR_USART3EN |
+			RCC_APB1ENR_TIM4EN   |
 			RCC_APB1ENR_TIM3EN   |
 			RCC_APB1ENR_TIM2EN   );
 }
