@@ -14,3 +14,7 @@
 *.d
 *.hex
 *.elf
+
+*.bin
+*.list
+*.srec
