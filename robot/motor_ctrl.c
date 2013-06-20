@@ -113,6 +113,13 @@ void motor_control_pwm(int left, int right)
 
 int motor_control_distance(int distance)
 {
+	if(distance >= 0)
+		motor_control_pwm(+500, +500);
+	else
+		motor_control_pwm(-500, -500);
+
+	bt_puts("ACK\n");
+
 	motor_start_delay(abs(distance));
 
 	return 1;
@@ -177,67 +184,48 @@ void motor_panic_stop()
 
 int motor_DELAY_TIMER_config(void)
 {
-	nvic_enable_irq(NVIC_TIM1_UP_IRQ);
+	nvic_enable_irq(NVIC_TIM4_IRQ);
 
-	timer_reset(TIM1);
+	timer_reset(TIM4);
 
 	/* set timer mode  no divider ; alignment on edge ; direction up */
-	timer_set_mode(TIM1, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
+	timer_set_mode(TIM4, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
 
 
-	int timer_prescaler = (rcc_ppre2_frequency / 2) / 1000;
+	int timer_prescaler = rcc_ppre1_frequency / 1000;
 
-	timer_set_prescaler(TIM1, timer_prescaler);
-	timer_set_period(TIM1, 2000);
-	timer_set_repetition_counter(TIM1, 0);
-	timer_disable_preload(TIM1);
+	timer_set_prescaler(TIM4, timer_prescaler);
+	timer_set_period(TIM4, 2000);
+	timer_set_repetition_counter(TIM4, 0);
+	timer_disable_preload(TIM4);
 
-	timer_one_shot_mode(TIM1);
+	//timer_one_shot_mode(TIM4);
 
-	timer_enable_irq(TIM1, 0xFF);
+	timer_enable_irq(TIM4, TIM_DIER_UIE);
 
 	return 1;
 }
 
 int motor_start_delay(int timeMs)
 {
-	timer_set_period(TIM1, timeMs);
-	timer_enable_counter(TIM1);
+	timer_set_period(TIM4, timeMs*2);
+	timer_enable_counter(TIM4);
+
+	gpio_set(GPIOA, GPIO2 | GPIO3);
 }
 
 
-void tim1_brk_isr(void)
+void tim4_isr(void)
 {
-	timer_clear_flag(TIM1, TIM_DIER_UIE);
+	timer_clear_flag(TIM4, TIM_DIER_UIE);
+	timer_disable_counter(TIM4);
 
-	timer_disable_counter(TIM1);
-	bt_puts("end\n");
+	motor_stop();
+
+	bt_puts("RDY\n");
+
+	gpio_clear(GPIOA, GPIO2 | GPIO3);
 }
-
-void tim1_up_isr(void)
-{
-	timer_clear_flag(TIM1, TIM_DIER_UIE);
-
-	timer_disable_counter(TIM1);
-	bt_puts("end\n");
-}
-
-void tim1_trg_com_isr(void)
-{
-	timer_clear_flag(TIM1, TIM_DIER_UIE);
-
-	timer_disable_counter(TIM1);
-	bt_puts("end\n");
-}
-
-void tim1_cc_isr(void)
-{
-	timer_clear_flag(TIM1, TIM_DIER_UIE);
-
-	timer_disable_counter(TIM1);
-	bt_puts("end\n");
-}
-
 
 void motor_PWM_TIMER_config(void)
 {
