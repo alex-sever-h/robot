@@ -114,9 +114,9 @@ void motor_control_pwm(int left, int right)
 int motor_run_time(int time_ms)
 {
 	if(time_ms >= 0)
-		motor_control_pwm(+500, +500);
+		motor_control_pwm(+450, +450);
 	else
-		motor_control_pwm(-500, -500);
+		motor_control_pwm(-450, -450);
 
 	bt_puts("ACK\n");
 
@@ -128,9 +128,9 @@ int motor_run_time(int time_ms)
 int motor_rot_time(int time_ms)
 {
 	if(time_ms >= 0)
-		motor_control_pwm(-500, +500);
+		motor_control_pwm(-450, +450);
 	else
-		motor_control_pwm(+500, -500);
+		motor_control_pwm(+450, -450);
 
 	bt_puts("ACK\n");
 
