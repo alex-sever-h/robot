@@ -111,16 +111,30 @@ void motor_control_pwm(int left, int right)
 
 }
 
-int motor_control_distance(int distance)
+int motor_run_time(int time_ms)
 {
-	if(distance >= 0)
+	if(time_ms >= 0)
 		motor_control_pwm(+500, +500);
 	else
 		motor_control_pwm(-500, -500);
 
 	bt_puts("ACK\n");
 
-	motor_start_delay(abs(distance));
+	motor_start_delay(abs(time_ms));
+
+	return 1;
+}
+
+int motor_rot_time(int time_ms)
+{
+	if(time_ms >= 0)
+		motor_control_pwm(-500, +500);
+	else
+		motor_control_pwm(+500, -500);
+
+	bt_puts("ACK\n");
+
+	motor_start_delay(abs(time_ms));
 
 	return 1;
 }

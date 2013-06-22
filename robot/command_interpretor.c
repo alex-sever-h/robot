@@ -21,10 +21,12 @@ int cmd_index;
 
 int motor_lr(char *cmd_parameter);
 int motor_angle(char *cmd_parameter);
-int motor_distance(char *cmd_parameter);
+int motor_fb_timed(char *cmd_parameter);
+int motor_rot_timed(char *cmd_parameter);
 
 const char m_lr[]  = "M_LR";
-const char m_d[]   = "M_D";
+const char m_ft[]   = "M_FT";
+const char m_rt[]  = "M_RT";
 const char m_ang[] = "M_ANGLE";
 const char cnct[]    = "CONNECT  ";
 const char discnct[] = "DISCONNECT  ";
@@ -38,9 +40,14 @@ command_struct_t cmds[]=
 				.cmd_action       = motor_lr,
 		},
 		{
-				.cmd_str          = m_d,
+				.cmd_str          = m_ft,
 				.cmd_parameter_nr = 1,
-				.cmd_action       = motor_distance,
+				.cmd_action       = motor_fb_timed,
+		},
+		{
+				.cmd_str          = m_rt,
+				.cmd_parameter_nr = 1,
+				.cmd_action       = motor_rot_timed,
 		},
 		{
 				.cmd_str          = m_ang,
@@ -133,19 +140,37 @@ int motor_lr(char *cmd_parameter)
 	return 1;
 }
 
-int motor_distance(char *cmd_parameter)
+int motor_fb_timed(char *cmd_parameter)
 {
-	int distance;
+	int time_ms;
 
-	distance =
+	time_ms =
 			(cmd_parameter[1] - '0') * 1000 +
 			(cmd_parameter[2] - '0') * 100 +
 			(cmd_parameter[3] - '0') * 10 +
 			(cmd_parameter[4] - '0');
 	if (cmd_parameter[0] == '-')
-		distance = -distance;
+		time_ms = -time_ms;
 
-	motor_control_distance(distance);
+	motor_run_time(time_ms);
+
+	return 0;
+}
+
+int motor_rot_timed(char *cmd_parameter)
+{
+	int time_ms;
+
+	time_ms =
+			(cmd_parameter[1] - '0') * 1000 +
+			(cmd_parameter[2] - '0') * 100 +
+			(cmd_parameter[3] - '0') * 10 +
+			(cmd_parameter[4] - '0');
+	if (cmd_parameter[0] == '-')
+			time_ms = -time_ms;
+
+	motor_rot_time(time_ms);
+	return 0;
 }
 
 int motor_angle(char *cmd_parameter)
