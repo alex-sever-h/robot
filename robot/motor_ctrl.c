@@ -18,6 +18,9 @@ static u16 motor_rear_left;
 static u16 motor_front_rigth;
 static u16 motor_rear_rigth;
 
+volatile int robot_in_motion;
+volatile u32 movement_time;
+
 
 static inline u16 get_oc_value(u32 percet, u32 percentage)
 {
@@ -30,6 +33,8 @@ void motor_init()
 	motor_PWM_TIMER_config();
 	motor_DELAY_TIMER_config();
 	motor_control_pwm(0, 0);
+
+	motor_run_time(1);
 }
 
 void motor_GPIO_config(void)
@@ -225,6 +230,9 @@ int motor_start_delay(int timeMs)
 	timer_set_period(TIM4, timeMs*2);
 	timer_enable_counter(TIM4);
 
+	movement_time = timeMs;
+
+	robot_in_motion = 1;
 	gpio_set(GPIOA, GPIO2 | GPIO3);
 }
 
@@ -236,9 +244,28 @@ void tim4_isr(void)
 
 	motor_stop();
 
+	send_final_update();
+
 	bt_puts("RDY\n");
 
+	robot_in_motion = 0;
 	gpio_clear(GPIOA, GPIO2 | GPIO3);
+}
+
+void motor_interrupt_movement()
+{
+	send_position_update();
+
+	timer_clear_flag(TIM4, TIM_DIER_UIE);
+	timer_disable_counter(TIM4);
+
+	bt_puts("ACK\n");
+
+	timer_set_counter(TIM4, 0);
+
+	motor_stop();
+
+	bt_puts("RDY\n");
 }
 
 void motor_PWM_TIMER_config(void)
@@ -306,4 +333,23 @@ void motor_PWM_TIMER_config(void)
 
 	timer_enable_counter(TIM3);
 
+}
+
+static inline void send_timing_update(u32 value)
+{
+	char buffer[10];
+	bt_puts("TIM : ");
+	uint_to_a(buffer, value);
+	bt_puts(buffer);
+	bt_puts("\n");
+}
+
+void send_position_update(void)
+{
+	send_timing_update((u32)timer_get_counter(TIM4) / 2);
+}
+
+void send_final_update(void)
+{
+	send_timing_update((u32)movement_time);
 }

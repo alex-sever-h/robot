@@ -23,11 +23,13 @@ int motor_lr(char *cmd_parameter);
 int motor_angle(char *cmd_parameter);
 int motor_fb_timed(char *cmd_parameter);
 int motor_rot_timed(char *cmd_parameter);
+int motor_interrupt(char *cmd_parameter);
 
 const char m_lr[]  = "M_LR";
 const char m_ft[]   = "M_FT";
 const char m_rt[]  = "M_RT";
 const char m_ang[] = "M_ANGLE";
+const char m_int[] = "M_INTERRUPT";
 const char cnct[]    = "CONNECT  ";
 const char discnct[] = "DISCONNECT  ";
 
@@ -53,6 +55,11 @@ command_struct_t cmds[]=
 				.cmd_str          = m_ang,
 				.cmd_parameter_nr = 2,
 				.cmd_action       = motor_angle,
+		},
+		{
+				.cmd_str          = m_int,
+				.cmd_parameter_nr = 0,
+				.cmd_action       = motor_interrupt,
 		},
 		{
 				.cmd_str          = cnct,
@@ -167,10 +174,15 @@ int motor_rot_timed(char *cmd_parameter)
 			(cmd_parameter[3] - '0') * 10 +
 			(cmd_parameter[4] - '0');
 	if (cmd_parameter[0] == '-')
-			time_ms = -time_ms;
+		time_ms = -time_ms;
 
 	motor_rot_time(time_ms);
 	return 0;
+}
+
+int motor_interrupt(char *cmd_parameter)
+{
+	motor_interrupt_movement();
 }
 
 int motor_angle(char *cmd_parameter)

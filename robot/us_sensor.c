@@ -8,47 +8,47 @@
 #include "us_sensor.h"
 
 t_sensor sensors[] =
-{
+		{
 		//front sensors
-		{ .id = "FR_C", .echo_gpio = GPIOC, .echo_gpio_n = GPIO0,
-				.exti = EXTI0, .trig_gpio = GPIOB,
-				.trig_gpio_n = GPIO12, .distance = 0, },
+				{ .id = "FR_C", .echo_gpio = GPIOC, .echo_gpio_n = GPIO0,
+						.exti = EXTI0, .trig_gpio = GPIOB,
+						.trig_gpio_n = GPIO12, .distance = 0, },
 				{ .id = "FR_L", .echo_gpio = GPIOC, .echo_gpio_n = GPIO1,
 						.exti = EXTI1, .trig_gpio = GPIOC,
 						.trig_gpio_n = GPIO12, .distance = 0, },
-						{ .id = "FR_R", .echo_gpio = GPIOC, .echo_gpio_n = GPIO2,
-								.exti = EXTI2, .trig_gpio = GPIOB,
-								.trig_gpio_n = GPIO15, .distance = 0, },
-								//rear sensors
-								{ .id = "RE_C", .echo_gpio = GPIOC, .echo_gpio_n = GPIO3,
-										.exti = EXTI3, .trig_gpio = GPIOB,
-										.trig_gpio_n = GPIO12, .distance = 0, },
-										{ .id = "RE_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO4,
-												.exti = EXTI4, .trig_gpio = GPIOB,
-												.trig_gpio_n = GPIO15, .distance = 0, },
-												{ .id = "RE_L", .echo_gpio = GPIOA, .echo_gpio_n = GPIO5,
-														.exti = EXTI5, .trig_gpio = GPIOC,
-														.trig_gpio_n = GPIO12, .distance = 0, },
-														//right sensors
-														{ .id = "RI_C", .echo_gpio = GPIOA, .echo_gpio_n = GPIO6,
-																.exti = EXTI6, .trig_gpio = GPIOB,
-																.trig_gpio_n = GPIO12, .distance = 0, },
-																{ .id = "RI_F", .echo_gpio = GPIOA, .echo_gpio_n = GPIO7,
-																		.exti = EXTI7, .trig_gpio = GPIOC,
-																		.trig_gpio_n = GPIO12, .distance = 0, },
-																		{ .id = "RI_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO8,
-																				.exti = EXTI8, .trig_gpio = GPIOB,
-																				.trig_gpio_n = GPIO15, .distance = 0, },
-																				//left sensors
-																				{ .id = "LE_C", .echo_gpio = GPIOB, .echo_gpio_n = GPIO9,
-																						.exti = EXTI9, .trig_gpio = GPIOB,
-																						.trig_gpio_n = GPIO12, .distance = 0, },
-																						{ .id = "LE_F", .echo_gpio = GPIOA, .echo_gpio_n = GPIO11,
-																								.exti = EXTI11, .trig_gpio = GPIOC, .trig_gpio_n =
-																										GPIO12, .distance = 0, },
-																										{ .id = "LE_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO12,
-																												.exti = EXTI12, .trig_gpio = GPIOB, .trig_gpio_n =
-																														GPIO15, .distance = 0, }, };
+				{ .id = "FR_R", .echo_gpio = GPIOC, .echo_gpio_n = GPIO2,
+						.exti = EXTI2, .trig_gpio = GPIOB,
+						.trig_gpio_n = GPIO15, .distance = 0, },
+				//rear sensors
+				{ .id = "RE_C", .echo_gpio = GPIOC, .echo_gpio_n = GPIO3,
+						.exti = EXTI3, .trig_gpio = GPIOB,
+						.trig_gpio_n = GPIO12, .distance = 0, },
+				{ .id = "RE_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO4,
+						.exti = EXTI4, .trig_gpio = GPIOB,
+						.trig_gpio_n = GPIO15, .distance = 0, },
+				{ .id = "RE_L", .echo_gpio = GPIOA, .echo_gpio_n = GPIO5,
+						.exti = EXTI5, .trig_gpio = GPIOC,
+						.trig_gpio_n = GPIO12, .distance = 0, },
+				//right sensors
+				{ .id = "RI_C", .echo_gpio = GPIOA, .echo_gpio_n = GPIO6,
+						.exti = EXTI6, .trig_gpio = GPIOB,
+						.trig_gpio_n = GPIO12, .distance = 0, },
+				{ .id = "RI_F", .echo_gpio = GPIOA, .echo_gpio_n = GPIO7,
+						.exti = EXTI7, .trig_gpio = GPIOC,
+						.trig_gpio_n = GPIO12, .distance = 0, },
+				{ .id = "RI_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO8,
+						.exti = EXTI8, .trig_gpio = GPIOB,
+						.trig_gpio_n = GPIO15, .distance = 0, },
+				//left sensors
+				{ .id = "LE_C", .echo_gpio = GPIOB, .echo_gpio_n = GPIO9,
+						.exti = EXTI9, .trig_gpio = GPIOB,
+						.trig_gpio_n = GPIO12, .distance = 0, },
+				{ .id = "LE_F", .echo_gpio = GPIOA, .echo_gpio_n = GPIO11,
+						.exti = EXTI11, .trig_gpio = GPIOC, .trig_gpio_n =
+								GPIO12, .distance = 0, },
+				{ .id = "LE_R", .echo_gpio = GPIOA, .echo_gpio_n = GPIO12,
+						.exti = EXTI12, .trig_gpio = GPIOB, .trig_gpio_n =
+								GPIO15, .distance = 0, }, };
 
 void init_counter_sensor()
 {

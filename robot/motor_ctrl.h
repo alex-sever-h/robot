@@ -30,10 +30,15 @@
 #define MOTOR_PWM_REAR_RIGHT	TIM_OC1
 #define MOTOR_PWM_FRONT_RIGHT	TIM_OC2
 
+
 void motor_init(void);
 
 void motor_control_lr(int left, int right);
 
 int motor_control_distance(int distance);
+
+void motor_interrupt_movement();
+
+void send_position_update();
 
 #endif /* MOTOR_CTRL_H_ */
